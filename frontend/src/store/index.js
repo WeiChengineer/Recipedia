@@ -1,23 +1,16 @@
-import { createStore, combineReducers, applyMiddleware, compose } from "redux";
-import thunk from "redux-thunk";
+// frontend/src/index.js
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { Provider } from 'react-redux';
+import App from './App';
+import configureStore from './store';
 
-const rootReducer = combineReducers({
-  // add reducer functions here
-});
+const store = configureStore();
 
-let enhancer;
-
-if (process.env.NODE_ENV === "production") {
-  enhancer = applyMiddleware(thunk);
-} else {
-  const logger = require("redux-logger").default;
-  const composeEnhancers =
-    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-  enhancer = composeEnhancers(applyMiddleware(thunk, logger));
-}
-
-const configureStore = (preloadedState) => {
-  return createStore(rootReducer, preloadedState, enhancer);
-};
-
-export default configureStore;
+const container = document.getElementById('root');
+const root = createRoot(container); // createRoot(container!) if you use TypeScript
+root.render(
+  <Provider store={store}>
+    <App />
+  </Provider>
+);

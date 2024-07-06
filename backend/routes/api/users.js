@@ -31,7 +31,6 @@ const validateSignup = [
 ];
 
 
-
 // Sign up
 router.post(
     '/',
@@ -40,7 +39,9 @@ router.post(
         const { email, password, username } = req.body;
         const hashedPassword = bcrypt.hashSync(password);
         const user = await User.create({ email, username, hashedPassword });
-
+        return res.json({
+            user:"404"
+        })
         const safeUser = {
             id: user.id,
             firstName: user.firstName,

@@ -1,13 +1,11 @@
-import SectionWrapper from "../../SectionWrapper";
-import Select from 'react-select';
-import countryList from 'react-select-country-list';
-import { useMemo } from 'react';
+import SectionWrapper from "../../../SectionWrapper"
+import Select from 'react-select'
+import countryList from 'react-select-country-list'
+import { useMemo } from 'react'
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useEffect } from "react";
-import Swal from "sweetalert2";
+import { useNavigate } from 'react-router-dom';
 
 const schema = z.object({
   name: z.string().min(1, { message: 'Name is required' }),
@@ -15,76 +13,51 @@ const schema = z.object({
   country: z.object({
     value: z.string().min(1, { message: 'Please select a value' }),
     label: z.string().min(1, { message: 'Please select a label' })
-  })
+  }).refine(data => data.value && data.label, { message: 'Please select an option' })
 });
 
-const CuisineFormUpdate = () => {
-  let { slug } = useParams();
+
+const CuisineForm = () => {
 
   const navigate = useNavigate();
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema)
   });
 
-  const getCuisine = async () => {
-    try {
-      const response = await fetch(`http://localhost:3000/categories/${slug}`);
-      const data = await response.json();
-      setValue('name', data.name);
-      setValue('description', data.description);
-      setValue('country', { value: data.country.value, label: data.country.label });
-      
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-
-  useEffect(() => {
-    getCuisine();
-  }, [slug]);
-
-  const updatedData = async (data) => {
-    const response = await fetch(`http://localhost:3000/categories/${slug}`, {
-      method: 'PUT',
+  const dataSubmitted = async (data) => {
+    
+    // const response = await fetch('/api/cuisines', {
+    const response = await fetch('http://localhost:3000/categories', {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(data)
-    });
+    })
 
-    const result = await response.json();
-    console.log(result);
+    const result = await response.json()
+    
+    console.log(result)
 
-    if (response.ok) {
-      Swal.fire({
-        title: 'Success',
-        text: 'Cuisine updated successfully!',
-        icon:'success',
-        confirmButtonText: 'Okay'
-      });
-      navigate('/categories');
+    if (result.status === 200) {
+      alert('Cuisine added successfully!')
+      navigate('/categories')
     } else {
-      Swal.fire({
-        title: 'Error',
-        text: 'Failed to update cuisine. Please try again.',
-        icon: 'error',
-        confirmButtonText: 'Okay'
-      });
-      navigate('/categories');
-    }
-  };
+      alert('Failed to add cuisine. Please try again.')
+      navigate('/categories')
+    } 
+  }
 
   const onSubmit = (data) => {
     console.log(data);
-    updatedData(data);
+    dataSubmitted(data)
   };
-
-  const options = useMemo(() => countryList().getData(), []);
+  const options = useMemo(() => countryList().getData(), [])
 
   const changeHandler = value => {
     setValue("country", value, { shouldValidate: true });
-  };
+  }
 
   return (
     <SectionWrapper>
@@ -112,6 +85,7 @@ const CuisineFormUpdate = () => {
         <div className="form-group">
           <label className="block text-sm font-medium text-gray-700">Select Option</label>
           <Select options={options} onChange={changeHandler} />
+
           {errors.country && <p className="mt-2 text-sm text-red-600">{errors.country.message}</p>}
         </div>
 
@@ -120,7 +94,7 @@ const CuisineFormUpdate = () => {
         </button>
       </form>
     </SectionWrapper>
-  );
-};
+  )
+}
 
-export default CuisineFormUpdate;
+export default CuisineForm

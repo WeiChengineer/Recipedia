@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Select from 'react-select';
-import SectionWrapper from "../../SectionWrapper"
+import SectionWrapper from "../../../SectionWrapper";
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Swal from 'sweetalert2';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { uploadImageHandler } from '../../../../utils/FirebaseImageUpload/uploadImage';
 
 const schema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -13,6 +14,7 @@ const schema = z.object({
   cuisineType: z.string().min(1, 'Cuisine Id is required'),
   rating: z.number().min(1, 'Rating must be between 1 and 5').max(5, 'Rating must be between 1 and 5'),
   notes: z.string().min(1, 'Notes are required'),
+  image: z.string().min(1, 'Image is required'),
 });
 
 const defaultValues = {
@@ -21,24 +23,23 @@ const defaultValues = {
   cuisineType: "", 
   rating: 5,
   notes: "",
+  image: "",
 };
 
-const RestaurantForm = () => {
+const UpdateRestaurantForm = () => {
   const navigate = useNavigate();
-  
+  const {slug} = useParams(); 
   const [cuisines, setCuisines] = useState([]);
-  
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm({
+
+  const { register, handleSubmit, setValue, formState: { errors, setError }, reset } = useForm({
     resolver: zodResolver(schema),
     defaultValues,
   });
 
   useEffect(() => {
-    
     fetch('http://localhost:3000/categories')
       .then(response => response.json())
       .then(data => {
-        
         const formattedCuisines = data.map(cuisine => ({
           value: cuisine.id,
           label: cuisine.name
@@ -47,13 +48,19 @@ const RestaurantForm = () => {
         setCuisines(formattedCuisines);
       })
       .catch(error => console.error('Error fetching cuisines:', error));
-  
-    }, []);
-    
-  const addNewRestaurant = async (data) =>{
+
+    fetch(`http://localhost:3000/restaurants/${slug}`)
+      .then(response => response.json())
+      .then(data => {
+        reset(data);
+      })
+      .catch(error => console.error('Error fetching restaurant data:', error));
+  }, [slug, reset]);
+
+  const updateRestaurant = async (data) => {
     try {
-      const response = await fetch('http://localhost:3000/restaurants', {
-        method: 'POST',
+      const response = await fetch(`http://localhost:3000/restaurants/${slug}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -61,54 +68,51 @@ const RestaurantForm = () => {
       });
 
       const result = await response.json();
-      
-      if(result.status === 200){
-        // Swal.fire({
-        //   title: 'Success',
-        //   text: 'Restaurant added successfully!',
-        //   icon:'success',
-        //   confirmButtonText: 'Okay'
-        // });
-        Swal.fire({
-          title: 'Error',
-          text: 'Failed to add new restaurant. Please try again.',
-          icon:'error',
-          confirmButtonText: 'Okay'
-        });
-        navigate('/restaurant');
-      }
-      else{
+
+      if (result.status === 200) {
         Swal.fire({
           title: 'Success',
-          text: 'Restaurant added successfully!',
-          icon:'success',
+          text: 'Restaurant updated successfully!',
+          icon: 'success',
           confirmButtonText: 'Okay'
         });
         navigate('/restaurant');
-        // Swal.fire({
-        //   title: 'Error',
-        //   text: 'Failed to add new restaurant. Please try again.',
-        //   icon:'error',
-        //   confirmButtonText: 'Okay'
-        // });
+      } else {
+        Swal.fire({
+          title: 'Error',
+          text: 'Failed to update restaurant. Please try again.',
+          icon: 'error',
+          confirmButtonText: 'Okay'
+        });
       }
-      
+
     } catch (error) {
-      
       Swal.fire({
         title: 'Error',
-        text: 'Failed to add new restaurant due to server error. Please try again.',
-        icon:'error',
+        text: 'Failed to update restaurant due to server error. Please try again.',
+        icon: 'error',
         confirmButtonText: 'Okay'
       });
-
     }
   }
 
-  const onSubmit = (data) => {
+  const imageHandler = async (event) => {
+    const img = event.target.files[0];
+    const imageUrl = await uploadImageHandler(img);
 
-    console.log(data);
-    addNewRestaurant(data);
+    if (imageUrl === '404 error') {
+      setError('image', {  
+        type: 'manual',
+        message: 'Image upload failed',
+      });
+      return;
+    }
+
+    setValue('image', imageUrl);
+  }
+
+  const onSubmit = (data) => {
+    updateRestaurant(data);
   };
 
   const handleCuisineChange = (selectedOption) => {
@@ -119,7 +123,7 @@ const RestaurantForm = () => {
     <SectionWrapper>
       <form className="rounded-3xl shadow-2xl p-4" onSubmit={handleSubmit(onSubmit)}>
         <h1 className="text-lg sm:text-2xl md:text-5xl text-center">
-          Add New Restaurant
+          Update Restaurant
         </h1>
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700">Name</label>
@@ -174,6 +178,17 @@ const RestaurantForm = () => {
           {errors.notes && <p className="text-red-500 text-xs mt-1">{errors.notes.message}</p>}
         </div>
 
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700">Restaurant Image</label>
+          <input 
+            type="file"
+            onChange={imageHandler}
+            accept="image/*"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          />
+          {errors.image && <p className="text-red-500 text-xs mt-1">{errors.image.message}</p>}
+        </div>
+
         <div className="flex justify-end">
           <button
             type="submit"
@@ -187,4 +202,4 @@ const RestaurantForm = () => {
   );
 };
 
-export default RestaurantForm;
+export default UpdateRestaurantForm;

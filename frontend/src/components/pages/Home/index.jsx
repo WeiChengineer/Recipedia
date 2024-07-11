@@ -8,16 +8,8 @@ const Home = () => {
       <Search />
       <HeroBanner />
 
+        <HomeBody />
       <div className='grid grid-cols-2 md:grid-cols-3 gap-4 mt-3'>
-        <HomeBody />
-        <HomeBody />
-        <HomeBody />
-        <HomeBody />
-        <HomeBody />
-        <HomeBody />
-        <HomeBody />
-        <HomeBody />
-        <HomeBody />
       </div>
     </SectionWrapper>
   )

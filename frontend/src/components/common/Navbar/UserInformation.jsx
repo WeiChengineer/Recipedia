@@ -11,7 +11,6 @@ const UserInformation = ({ cookies, removeCookie }) => {
       if (data.status === 200) {
         setUser(data.data[0]);
         console.log(data.data[0].image);
-
       } else {
         console.log("Error fetching user data");
       }
@@ -20,16 +19,26 @@ const UserInformation = ({ cookies, removeCookie }) => {
     }
   };
 
+  const handleLogout = () => {
+    removeCookie("auth");
+  };
+
   useEffect(() => {
     getUserInfo();
   }, []); 
 
   return (
     <>
-      {user && <> 
-       <img className="userImage" src={user.image} alt="User" />
-      </>
-       }
+      {user && (
+        <div className="userContainer">
+          <img className="userImage" src={user.image} alt="User" />
+          <div className="userPopup">
+            <p>Username: {user.username}</p>
+            <p>Email: {user.email}</p>
+            <button onClick={handleLogout}>Logout</button>
+          </div>
+        </div>
+      )}
     </>
   );
 };

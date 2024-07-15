@@ -1,7 +1,7 @@
 import SectionWrapper from "../../common/SectionWrapper"
 import { Link } from "react-router-dom"
 
-import Search from "./Search"
+import Search from "../Home/Search"
 import CountryFlag from "./CountryFlag"
 import { useEffect, useState } from "react"
 import '../../css/common.css';
@@ -37,7 +37,7 @@ const Categories = () => {
           IsUserExist() && <Link to="/cuisine/cuisineForm" className="btn btn-primary">Add Cuisine</Link>
         }
       </div>
-      {/* <Search /> */}
+      <Search />
       <div className="grid grid-sm-2 grid-md-3 grid-lg-4">
         {
           cusines.map((cuisine, index) => (

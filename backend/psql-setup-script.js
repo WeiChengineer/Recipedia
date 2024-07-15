@@ -1,8 +1,10 @@
 // backend/psql-setup-script.js
-const { sequelize } = require('./db/models');
+const config = require("./config");
+const { sequelize } = require("./db/models");
 
-sequelize.showAllSchemas({ logging: false }).then(async (data) => {
-    if (!data.includes(process.env.SCHEMA)) {
-        await sequelize.createSchema(process.env.SCHEMA);
-    }
+sequelize.showAllSchemas({ logging: true }).then(async (data) => {
+  console.log("SCHEMA === ", config.schema);
+  if (!data.includes(config.schema)) {
+    const schema = await sequelize.createSchema(process.env.SCHEMA);
+  }
 });

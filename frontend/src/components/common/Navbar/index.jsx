@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import '../../css/navbar.css';
 import { useCookies } from 'react-cookie';
+import UserInformation from './UserInformation';
 
 const Navbar = () => {
     const [cookies, removeCookie] = useCookies();
@@ -65,18 +66,7 @@ const Navbar = () => {
                             <li className="nav-item">
                                 {
                                     userExist ? (
-                                        <button
-                                            id="logout"
-                                            to="/auth/logout"
-                                            className="btn btn-primary"
-                                            onClick={() => {
-                                                removeCookie("auth")
-                                                setUserExist(false);
-                                            }}
-
-                                        >
-                                            Logout
-                                        </button>
+                                        <UserInformation cookies={cookies} removeCookie={removeCookie}/>
                                     ) : (
                                         <Link
                                             id="signup"

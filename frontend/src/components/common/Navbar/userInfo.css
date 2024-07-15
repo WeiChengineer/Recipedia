@@ -1,0 +1,7 @@
+.userImage{
+    width: 30px;
+    height: 30px;
+    background: #fff;
+    border-radius: 50%;
+    object-fit: contain;
+}

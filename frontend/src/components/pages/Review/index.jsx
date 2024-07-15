@@ -1,76 +1,104 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import StarRatings from "react-star-ratings";
+import Swal from "sweetalert2";
+import '../../css/review.css'; 
+import { useCookies } from "react-cookie";
 
-const Review = ({ id ,recipeName }) => {
-
+const Review = ({ id  }) => {
     const [reviews, setReviews] = useState([]);
+    const [cookies] = useCookies();
+
+    const isSameUser = ()=>{
+        if(cookies.auth !== undefined)
+        {
+            return cookies.auth.userid === reviews.userid;
+        }
+    }
 
     const getReviews = async (id) => {
         try {
-            const response = await fetch(`http://localhost:3000/reviews?recipe_id=${id}`);
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
+            const response = await fetch(`http://localhost:8000/api/recipe/reviews/${id}`);
             const data = await response.json();
-            console.log('reviews=====>', data);
-            setReviews(data);
+            if (data.status === 200) {
+                setReviews(data.data);
+            }
         } catch (error) {
             console.log('error in fetching reviews=====>', error);
         }
     };
 
-    const deleteReview = async (id) => {
+    const deleteReview = async (reviewId) => {
         try {
-            const response = await fetch(`http://localhost:3000/reviews?recipe_id=${id}`, {
+            const response = await fetch(`http://localhost:8000/api/reviews/deleteReview/${reviewId}`, {
                 method: 'DELETE',
             });
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
+            const result = await response.json();
+
+            if (result.status === 200) {
+                setReviews(prevReviews => prevReviews.filter(review => review.reviewid !== reviewId));
+                Swal.fire({
+                    title: 'Deleted!',
+                    text: 'Review has been deleted.',
+                    icon: 'success',
+                    confirmButtonText: 'Continue'
+                });
+            } else {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to delete review.',
+                    icon: 'error',
+                    confirmButtonText: 'Continue'
+                });
             }
-            console.log('Review deleted successfully');
         } catch (error) {
-            console.error(error);
+            Swal.fire({
+                title: 'Error!',
+                text: 'Failed to delete review.',
+                icon: 'error',
+                confirmButtonText: 'Continue'
+            });
         }
     }
 
     useEffect(() => {
-        getReviews(id)
+        getReviews(id);
     }, [id]);
 
     return (
-        <div className='mt-4'>
-            <h1 className='text-center text-3xl text-gray-800 font-bold'>All Reviwes are here</h1>
-
-            {
-                reviews.map((review, index) => (
-                    <div key={index} className="flex flex-col gap-4 bg-slate-100 p-4 my-3 rounded-2xl">
-                        <div className="flex justify-between">
-                            <div className="flex gap-2">
-                                <span className='font-bold text-xl'>{recipeName}</span>
+        <div className='review-container'>
+            {reviews.length === 0 ? (
+                <h1 className='no-reviews'>No reviews found</h1>
+            ) : (
+                <>
+                    <h1 className='all-reviews'>All Reviews are here</h1>
+                    {reviews.map((review, index) => (
+                        <div key={index} className="review-card">
+                            <div className="rating">
+                                <StarRatings
+                                    rating={review.rating}
+                                    starDimension="20px"
+                                    starSpacing="2px"
+                                />
                             </div>
-                            <StarRatings
-                                rating={review.rating}
-                                starDimension="40px"
-                                starSpacing="15px"
-                            />
-                        </div>
-                        <div>
-                            {review.content}
-                        </div>
-                        <div className="flex justify-between">
-                            <span>{new Date(review.date).toLocaleString()}</span>
-                            <div className='flex gap-4'>
-                                <Link to={`/review/updateReview/${review.id}`} className='text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-2 py-2.5 '>Edit</Link>
-                                <button onClick={() => deleteReview(review.id)} className='text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-2 py-2.5 '>Delete</button>
-
+                            <div>
+                                <h1 className="message-title">Message</h1>
+                                <p className="message-content">{review.content}</p>
+                            </div>
+                            <div className="review-footer">
+                                <span>{new Date(review.date).toLocaleString()}</span>
+                                {
+                                    isSameUser && <div className='review-actions'>
+                                    <Link to={`/review/updateReview/${review.reviewid}`} className='edit-button'>Edit</Link>
+                                    <button onClick={() => deleteReview(review.reviewid)} className='delete-button'>Delete</button>
+                                </div>}
                             </div>
                         </div>
-                    </div>
-                ))
-            }
+                    ))}
+                </>
+            )}
         </div>
     )
 }
 
-export default Review
+export default Review;

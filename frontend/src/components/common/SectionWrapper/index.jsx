@@ -1,8 +1,7 @@
-
-// eslint-disable-next-line react/prop-types
+import '../../css/common.css';
 const SectionWrapper = ({children}) => {
   return (
-    <div className="max-w-[1200px] mx-auto p-4">
+    <div className="container">
       {children}
     </div>
   )

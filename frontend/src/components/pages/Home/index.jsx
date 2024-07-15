@@ -1,16 +1,14 @@
 import SectionWrapper from '../../common/SectionWrapper'
-import HeroBanner from './HeroBanner'
-import HomeBody from './HomeBody'
+import Recipes from '../Recipes'
 import Search from './Search'
+import { useCookies } from 'react-cookie'
 const Home = () => {
+  const [cookies] = useCookies();
+  console.log("COOKIES : ", cookies.auth.userid)
   return (
     <SectionWrapper>
       <Search />
-      <HeroBanner />
-
-        <HomeBody />
-      <div className='grid grid-cols-2 md:grid-cols-3 gap-4 mt-3'>
-      </div>
+      <Recipes />
     </SectionWrapper>
   )
 }

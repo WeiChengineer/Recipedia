@@ -11,7 +11,7 @@ import { uploadImageHandler } from '../../../../utils/FirebaseImageUpload/upload
 const schema = z.object({
   name: z.string().min(1, 'Name is required'),
   location: z.string().min(1, 'Location is required'),
-  cuisineType: z.string().min(1, 'Cuisine Id is required'),
+  cuisineType: z.number().min(1, 'Cuisine Id is required'),
   rating: z.number().min(1, 'Rating must be between 1 and 5').max(5, 'Rating must be between 1 and 5'),
   notes: z.string().min(1, 'Notes are required'),
   image: z.string().min(1, 'Image is required'),
@@ -20,7 +20,7 @@ const schema = z.object({
 const defaultValues = {
   name: "",
   location: "",
-  cuisineType: "", 
+  cuisineType: null, 
   rating: 5,
   notes: "",
   image: "",
@@ -37,11 +37,11 @@ const UpdateRestaurantForm = () => {
   });
 
   useEffect(() => {
-    fetch('http://localhost:3000/categories')
+    fetch('http://localhost:8000/api/cuisines')
       .then(response => response.json())
       .then(data => {
-        const formattedCuisines = data.map(cuisine => ({
-          value: cuisine.id,
+        const formattedCuisines = data.data.map(cuisine => ({
+          value: cuisine.cuisineid,
           label: cuisine.name
         }));
 
@@ -49,17 +49,17 @@ const UpdateRestaurantForm = () => {
       })
       .catch(error => console.error('Error fetching cuisines:', error));
 
-    fetch(`http://localhost:3000/restaurants/${slug}`)
+    fetch(`http://localhost:8000/api/restaurants/${slug}`)
       .then(response => response.json())
       .then(data => {
-        reset(data);
+        reset(data.data);
       })
       .catch(error => console.error('Error fetching restaurant data:', error));
   }, [slug, reset]);
 
   const updateRestaurant = async (data) => {
     try {
-      const response = await fetch(`http://localhost:3000/restaurants/${slug}`, {
+      const response = await fetch(`http://localhost:8000/api/restaurants/updateRestaurant/${slug}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -121,78 +121,74 @@ const UpdateRestaurantForm = () => {
 
   return (
     <SectionWrapper>
-      <form className="rounded-3xl shadow-2xl p-4" onSubmit={handleSubmit(onSubmit)}>
-        <h1 className="text-lg sm:text-2xl md:text-5xl text-center">
+      <form className="shadow p-4" onSubmit={handleSubmit(onSubmit)}>
+        <h1 className="heading text-center">
           Update Restaurant
         </h1>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Name</label>
+          <label>Name</label>
           <input
             type="text"
             {...register('name')}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
-          {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
+          {errors.name && <p className="text-warning">{errors.name.message}</p>}
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Location</label>
+          <label>Location</label>
           <input
             type="text"
             {...register('location')}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
-          {errors.location && <p className="text-red-500 text-xs mt-1">{errors.location.message}</p>}
+          {errors.location && <p className="text-warning">{errors.location.message}</p>}
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Cuisine Type</label>
+          <label>Cuisine Type</label>
           <Select
             options={cuisines}
             onChange={handleCuisineChange}
             className="mt-1 block w-full"
           />
-          {errors.cuisineType && <p className="text-red-500 text-xs mt-1">{errors.cuisineType.message}</p>}
+          {errors.cuisineType && <p className="text-warning">{errors.cuisineType.message}</p>}
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Rating</label>
+          <label>Rating</label>
           <input
             type="number"
             max={5}
             min={1}
             step={0.1}
             {...register('rating', { valueAsNumber: true })}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
-          {errors.rating && <p className="text-red-500 text-xs mt-1">{errors.rating.message}</p>}
+          {errors.rating && <p className="text-warning">{errors.rating.message}</p>}
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Notes</label>
+          <label>Notes</label>
           <textarea
             {...register('notes')}
             rows={4}
             className="mt-1 block resize-none w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
-          {errors.notes && <p className="text-red-500 text-xs mt-1">{errors.notes.message}</p>}
+          {errors.notes && <p className="text-warning">{errors.notes.message}</p>}
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Restaurant Image</label>
+          <label>Restaurant Image</label>
           <input 
             type="file"
             onChange={imageHandler}
             accept="image/*"
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
-          {errors.image && <p className="text-red-500 text-xs mt-1">{errors.image.message}</p>}
+          {errors.image && <p className="text-warning">{errors.image.message}</p>}
         </div>
 
-        <div className="flex justify-end">
+        <div>
           <button
             type="submit"
-            className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+            className="btn btn-primary"
           >
             Submit
           </button>

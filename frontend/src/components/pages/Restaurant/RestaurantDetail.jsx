@@ -4,42 +4,53 @@ import { useNavigate } from "react-router-dom";
 import SectionWrapper from "../../common/SectionWrapper";
 import Swal from "sweetalert2";
 import StarRatings from "react-star-ratings";
+import '../../css/restaurantDetail.css';
+import CheckUserLogin from "../../utils/sameUserLogin";
 
 const RestaurantDetail = () => {
   const navigate = useNavigate();
   let { slug } = useParams();
 
   const [restaurant, setRestaurant] = useState({});
-  const [recipes, setRecipes] = useState()
+  const [cuisineName, setCuisineName] = useState();
+  const [recipes, setRecipes] = useState([])
 
-  // const getRecipes = async () =>{
-  //   const response = await fetch('http://localhost:3000/recipes');
-  //   const data = await response.json();
-  //   setRecipes(data);
-  // }
+  const getRecipes = async () => {
+    const response = await fetch(`http://localhost:8000/api/resturants/recipes/${slug}`);
+    const data = await response.json();
+    setRecipes(data.data);
+  }
+
+  const getCuisine = async () => {
+    const response = await fetch(`http://localhost:8000/api/cuisines/${restaurant.cuisineid}`);
+    const data = await response.json();
+    setCuisineName(data.data.name)
+  }
 
   useEffect(() => {
-    // getRecipes();
 
-    fetch(`http://localhost:3000/restaurants/${slug}`)
+    fetch(`http://localhost:8000/api/restaurants/${slug}`)
       .then(response => response.json())
       .then(data => {
-        setRestaurant(data);
+        setRestaurant(data.data);
       })
       .catch(error => {
         console.error("Error:", error);
       });
-  })
+    getCuisine();
+    getRecipes();
+  }, [slug])
 
   const deleteRestaurant = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/restaurants/${slug}`, {
+      const response = await fetch(`http://localhost:8000/api/restaurants/deleteRestaurant/${slug}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      if (response.ok) {
+      const result = await response.json();
+      if (result.status === 200) {
         Swal.fire({
           title: 'Deleted!',
           text: 'Restaurant has been deleted.',
@@ -61,7 +72,7 @@ const RestaurantDetail = () => {
     } catch (error) {
       Swal.fire({
         title: 'Error!',
-        text: 'Failed to delete restaurant.',
+        text: 'Failed to delete restaurant',
         icon: 'error',
         confirmButtonText: 'Ok'
       });
@@ -71,61 +82,76 @@ const RestaurantDetail = () => {
 
   return (
     <SectionWrapper>
-      <div className="bg-white shadow-lg rounded-lg overflow-hidden p-5">
-        <div className="sm:flex">
+      <div className="shadow p-4">
+        <div className="restaurant-grid">
           <div className="sm:flex-shrink-0">
-            <img className="h-48 w-full object-cover sm:h-96 sm:w-96" src={restaurant.image} alt={restaurant.name} />
+            <img className="restaurant-detail-img" src={restaurant.image} alt={restaurant.name} />
           </div>
-          <div className="p-6">
-            <label htmlFor="" className="block mt-1 text-lg leading-tight font-medium text-black">Restaurant</label>
-            <h1 className="my-1 indent-6 text-gray-700">{restaurant.name}</h1>
-            <label htmlFor="" className="block mt-1 text-lg leading-tight font-medium text-black">Location</label>
-            <p className="my-1 indent-6 text-gray-700">{restaurant.location}</p>
-            <label htmlFor="" className="block mt-1 text-lg leading-tight font-medium text-black">Description</label>
-            <p className="my-1 indent-6 text-gray-700">{restaurant.notes}</p>
-            <label htmlFor="" className="block mt-1 text-lg leading-tight font-medium text-black">Cuisine Type</label>
-            <div className="my-1 indent-6 text-gray-700">{restaurant.cuisineType}</div>
-            <label htmlFor="" className="block mt-1 text-lg leading-tight font-medium text-black">Rating </label>
-            <div className="my-1 flex items-center">
+          <div className="">
+            <label>Restaurant</label>
+            <h1 className="indent">{restaurant.name}</h1>
+            <label>Location</label>
+            <p className="indent">{restaurant.location}</p>
+            <label>Description</label>
+            <p className="indent">{restaurant.notes}</p>
+            <label>Cuisine Type</label>
+            <div className="indent">{cuisineName}</div>
+            <label>Rating </label>
+            <div className="ml-4">
               <StarRatings
                 rating={restaurant.rating}
                 starRatedColor="gold"
                 numberOfStars={5}
-                starDimension="30px"
+                starDimension="20px"
                 starSpacing="1px"
               />
 
             </div>
           </div>
         </div>
-
-        <div className="flex justify-between flex-col sm:flex-row gap-7 my-4">
-          <div className="flex flex-row gap-3">
-            <p className="rounded-2xl text-lg font-bold px-3 py-2 bg-slate-400 ">{restaurant.name}</p>
-            <p className="rounded-2xl text-lg font-bold px-3 py-2 bg-slate-400 ">{restaurant.location}</p>
-            <p className="rounded-2xl text-lg font-bold px-3 py-2 bg-slate-400 ">{restaurant.cuisineType}</p>
-            {/* <Link to={`/restaurant/restaruantReview/${slug}`} className="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg px-3 py-2">
-              Reviews
-            </Link> */}
+        <div className="restaurant-grid mt-3">
+          <div className="flex-row">
+            <p className="restaurant-tags">{restaurant.name}</p>
+            <p className="restaurant-tags">{restaurant.location}</p>
+            {/* <p className="restaurant-tags">{cuisineName}</p> */}
           </div>
-
-          <div className="flex flex-wrap justify-start">
-            <Link to={`/restaurant/updateRestaurant/${slug}`} className="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">
-              Edit Restaurant
-            </Link>
-            <button onClick={deleteRestaurant} className="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">
-              Delete Restaurant
-            </button>
-            <Link to={`/recipes/recipesForm/${slug}`} className="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">
-              Add a recipe
-            </Link>
-          </div>
+          {
+            CheckUserLogin(restaurant.userid) &&
+            <div className="flex-end">
+              <Link to={`/restaurant/updateRestaurant/${slug}`} className="btn btn-primary">
+                Edit Restaurant
+              </Link>
+              <button onClick={deleteRestaurant} className="btn btn-danger">
+                Delete Restaurant
+              </button>
+              <Link to={`/recipes/recipesForm/${slug}`} className="btn btn-primary">
+                Add a recipe
+              </Link>
+            </div>
+          }
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 my-4">
-          {/* <div className="rounded-2xl text-lg font-bold px-3 py-2 bg-slate-400 ">
-            Lorem ipsum dolor sit amet consectetur.
-          </div> */}
+        <h1 className="heading mt-5">
+          Recipes at {restaurant.name}
+        </h1>
+        {
+          !recipes &&
+          <h1 className="no-recipe indent mt-3">No Recipe are here</h1>
+        }
+
+        <div className="grid grid-sm-2 grid-md-3 grid-lg-4 mt-5">
+          {recipes && recipes.map((recipe, index) => (
+            <div key={index} className="card">
+              <img src={recipe.image} alt={recipe.name} />
+              <div className="card-content flex">
+                <h2>{recipe.name}</h2>
+                <p> {recipe.notes}</p>
+                <Link to={`/recipes/recipesDetail/${recipe.recipeid}`} className="btn btn-primary">
+                  More Detail
+                </Link>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </SectionWrapper>

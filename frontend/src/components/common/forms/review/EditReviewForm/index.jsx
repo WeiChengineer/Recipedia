@@ -1,54 +1,57 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {  useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import SectionWrapper from '../../../SectionWrapper';
+import Swal from 'sweetalert2';
+import { useCookies } from 'react-cookie';
 
 const reviewSchema = z.object({
     content: z.string().min(1, 'Content is required'),
     rating: z.number().min(1, 'Rating must be at least 1').max(5, 'Rating must be at most 5'),
-    user_id: z.string(), 
-    recipe_id: z.string(), 
+    userid: z.number(),
+    recipeid: z.number(),
     date: z.string()
 });
 
 const EditReviewForm = () => {
     const navigate = useNavigate();
     const { slug } = useParams();
-    const [existingReview, setExistingReview] = useState(null);
-    const { register, handleSubmit, setValue, formState: { errors } } = useForm({
+    const [cookies] = useCookies();
+
+    const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm({
         resolver: zodResolver(reviewSchema)
     });
 
-    useEffect(() => {
-
-        const fetchReview = async () => {
-            try {
-                const response = await fetch(`http://localhost:3000/reviews/${slug}`);
-                if (response.ok) {
-                    const reviewData = await response.json();
-                    setExistingReview(reviewData);
-
-                    setValue('content', reviewData.content);
-                    setValue('rating', reviewData.rating);
-                    setValue('user_id', reviewData.user_id);
-                    setValue('recipe_id', reviewData.recipe_id);
-                    setValue('date', reviewData.date);
-                } else {
-                    console.error('Failed to fetch review');
-                }
-            } catch (error) {
-                console.error('Error:', error);
+    const fetchReview = async () => {
+        try {
+            const response = await fetch(`http://localhost:8000/api/reviews/${slug}`);
+            const result = await response.json();
+            
+            if (result.status===200) {
+                reset(result.data[0]);
+                // setValue('content',result.data[0] );
+                // setValue('rating', result.data.rating);
+            } else {
+                console.error('Failed to fetch review');
             }
-        };
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
 
+    useEffect(() => {
+        setValue('userid', cookies.auth.userid);
+        setValue('recipeid', parseInt(slug, 10));
+        setValue('date', new Date().toISOString());
         fetchReview();
-    }, [slug, setValue]);
+    }, [slug,setValue]);
 
     const onSubmit = async (data) => {
+        console.log(data)
         try {
-            const response = await fetch(`http://localhost:3000/reviews/${slug}`, {
+            const response = await fetch(`http://localhost:8000/api/reviews/updateReview/${slug}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -56,38 +59,54 @@ const EditReviewForm = () => {
                 body: JSON.stringify(data)
             });
 
-            if (response.ok) {
-                console.log('Review updated successfully');
-                navigate(-1);
-            } else {
-                console.error('Failed to update review');
-            }
             const result = await response.json();
-            console.log("review updated successfully", result);
+            console.log("object updated successfully", result)
+            if (result.status === 200) {
+                Swal.fire({
+                    title: 'Success',
+                    text: 'Review updated successfully!',
+                    icon:'success',
+                    confirmButtonText: 'Okay'
+                }).then(() => {
+                    navigate(-1);
+                })
+               
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Failed to update review',
+                    icon: 'error',
+                    confirmButtonText: 'Okay'
+                }).then(()=>{
+                    navigate(-1);
+                })
+            }
         } catch (error) {
-            console.error('Error:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Failed to update review',
+                icon: 'error',
+                confirmButtonText: 'Okay'
+            }).then(()=>{
+                navigate(-1);
+            })
         }
     };
-
-    if (!existingReview) {
-        return <p>Loading review...</p>; // Optional: Add loading indicator
-    }
-
     return (
         <SectionWrapper>
             <div className="mt-10 p-5 border border-gray-200 rounded-lg shadow-md">
-                <h2 className="text-2xl font-semibold mb-5">Edit Review</h2>
-                <form onSubmit={handleSubmit(onSubmit)}>
+                <h2 className="heading">Edit Review</h2>
+                <form onSubmit={handleSubmit(onSubmit)} className='mt-4'>
                     <div className="mb-4">
                         <label htmlFor="rating" className="block text-sm font-medium text-gray-700">Rating</label>
                         <input
                             type="number"
-                            step={0.1}
+                            step={1}
                             id="rating"
-                            {...register('rating', { valueAsNumber: true, setValueAs: (value) => parseFloat(value) })}
+                            {...register('rating', { valueAsNumber: true })}
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                         />
-                        {errors.rating && <span className="text-red-500 text-sm">{errors.rating.message}</span>}
+                        {errors.rating && <span className="text-warning">{errors.rating.message}</span>}
                     </div>
                     <div className="mb-4">
                         <label htmlFor="content" className="block text-sm font-medium text-gray-700">Content</label>
@@ -97,10 +116,10 @@ const EditReviewForm = () => {
                             {...register('content')}
                             className="mt-1 resize-none block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                         />
-                        {errors.content && <span className="text-red-500 text-sm">{errors.content.message}</span>}
+                        {errors.content && <span className="text-warning">{errors.content.message}</span>}
                     </div>
 
-                    <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">Update Review</button>
+                    <button type="submit" className="btn btn-primary">Update Review</button>
                 </form>
             </div>
         </SectionWrapper>

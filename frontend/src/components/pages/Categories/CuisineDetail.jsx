@@ -4,48 +4,55 @@ import CountryFlag from './CountryFlag';
 import SectionWrapper from '../../common/SectionWrapper';
 import Swal from 'sweetalert2'
 import { useNavigate } from 'react-router-dom';
+import '../../css/common.css';
+import '../../css/cuisineDetail.css';
+import CheckUserLogin from '../../utils/sameUserLogin';
+import { useCookies } from 'react-cookie';
 
 const CuisineDetail = () => {
     const navigate = useNavigate();
+    const [cookies] = useCookies();
+
     let { slug } = useParams();
     console.log("id=>", slug);
 
     const [cuisineDetail, setCuisinesDetail] = useState({});
+    
+    const [isSameUser, setIsSameUser] = useState(false);
+
+    const checkSameUser = (user_id) => {
+        if (cookies.auth !== undefined) {
+            return cookies.auth.userid === user_id;
+        }
+        return false;
+    }
 
     const deleteCuisine = async () => {
         try {
-            const response = await fetch(`http://localhost:3000/categories/${slug}`, {
+            const response = await fetch(`http://localhost:8000/api/cuisines/deleteCuisine/${slug}`, {
                 method: 'DELETE',
             });
             const result = await response.json();
             console.log("Deleted cuisine===>", result)
 
-            if (result.status === 200)
-            {
+            if (result.status === 200) {
                 Swal.fire({
                     title: 'Cuisine deleted successfully!',
                     text: 'The cuisine has been deleted.',
-                    icon:'success',
+                    icon: 'success',
                     confirmButtonText: 'Okay'
                 })
                 navigate('/categories');
             }
-            else
-            {
+            else {
                 Swal.fire({
-                    title: 'Cuisine deleted successfully!',
-                    text: 'The cuisine has been deleted.',
-                    icon:'success',
+                    title: 'Failed to delete cuisine!',
+                    text: 'The cuisine could not be deleted because this is used in restaurants.',
+                    icon: 'error',
                     confirmButtonText: 'Okay'
                 })
-                // Swal.fire({
-                //     title: 'Failed to delete cuisine!',
-                //     text: 'The cuisine could not be deleted.',
-                //     icon:'error',
-                //     confirmButtonText: 'Okay'
-                // })
                 navigate('/categories');
-                console.error('Error deleting cuisine:');
+                console.error('Error deleting cuisine:', result);
             }
         } catch (error) {
             console.error('Error deleting cuisine:', error);
@@ -54,10 +61,10 @@ const CuisineDetail = () => {
 
     const getCuisineDetail = async () => {
         try {
-            const response = await fetch(`http://localhost:3000/categories/${slug}`);
+            const response = await fetch(`http://localhost:8000/api/cuisines/${slug}`);
             const data = await response.json();
             console.log("detail===>", data)
-            setCuisinesDetail({ ...data });
+            setCuisinesDetail(data.data);
             console.log("detailed ===>", cuisineDetail)
         }
         catch (error) {
@@ -69,28 +76,38 @@ const CuisineDetail = () => {
         getCuisineDetail();
     }, [])
 
+    useEffect(() => {
+        if (cuisineDetail) {
+            setIsSameUser(checkSameUser(cuisineDetail.userid));
+        }
+    }, [cookies, cuisineDetail]);
+
+
 
     return (
         <SectionWrapper>
-            <div className="w-full  flex flex-col bg-white border border-gray-200 rounded-lg shadow-2xl p-4  hover:bg-gray-100 transition duration-300 ease-in-out">
-                <div className='h-80'>
+            <div className="flex p-4 shadow">
+                <div className='cuisine-flag-h'>
                     {cuisineDetail?.country && (
                         <CountryFlag
-                            countryCode={cuisineDetail.country.value}
-                            title={cuisineDetail.country.label}
+                            countryCode={cuisineDetail.value}
+                            title={cuisineDetail.country}
                             slug={`/cuisine/cuisineDetail/${slug}`}
                         />
                     )}
                 </div>
-                <div className="flex flex-col justify-between p-4 leading-normal">
-                    <h1 className="mb-2 text-2xl font-bold tracking-tight text-gray-900">{cuisineDetail?.name}</h1>
-                    <p className="mb-3 font-normal text-gray-700 indent-10 text-justify">{cuisineDetail?.description}</p>
+                <div className="flex">
+                    <h1 id='h1'>{cuisineDetail?.name}</h1>
+                    <p className="indent">{cuisineDetail?.description}</p>
                 </div>
-                <div className='flex justify-end'>
-                    <Link to={`/cuisine/updateForm/${slug}`} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Edit Cuisine</Link>
-                    <button onClick={deleteCuisine} className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Delete Cuisine</button>
+                {
+                    isSameUser &&
+                    <div className='flex-end'>
+                        <Link to={`/cuisine/updateForm/${slug}`} className='btn btn-primary'>Edit Cuisine</Link>
+                        <button onClick={deleteCuisine} className="btn btn-danger">Delete Cuisine</button>
 
-                </div>
+                    </div>
+                }
             </div>
         </SectionWrapper>
     )

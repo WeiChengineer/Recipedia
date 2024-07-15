@@ -1,44 +1,50 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import SectionWrapper from "../../common/SectionWrapper";
+import '../../css/restaurants.css';
+import IsUserExist from '../../utils/isUserExist';
 
 const Restaurant = () => {
   const [restaurants, setRestaurants] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:3000/restaurants')
+    fetch('http://localhost:8000/api/restaurants')
       .then(response => response.json())
       .then(data => {
-        setRestaurants(data);
-        console.log("data is ", data)
+        setRestaurants(data.data);
+        console.log("data is ", data.data)
       })
       .catch(error => console.error('Error fetching restaurants:', error));
   }, []);
 
   return (
     <SectionWrapper>
-      <h1 className='text-center font-bold my-6 text-2xl'>Welcome to Restaurant Management System</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <div className="border-2 border-black max-h-72 overflow-y-auto rounded-2xl p-3">
-          <h1 className='text-lg  md:text-2xl lg:text-4xl text-center font-bold mb-3'>All RESTAURANTS</h1>
-          <ol className="list-decimal list-inside px-3  font-bold">
+      <h1 className='restaurant-heading text-center'>Welcome to Restaurant Management System</h1>
+      <div className="restaurant-grid">
+        <div className="restaurants-list">
+          <div className='flex-space-between mb-3'>
+            <h1 className='restaurant-heading'>All RESTAURANTS</h1>
+            {
+              IsUserExist() &&<Link to="/restaurant/addRestaurant" className="btn btn-primary">Add New Restaurant</Link>
+            }
+          </div>
+          <ol className="restaurant-ol">
             {restaurants.map((restaurant) => (
               <li key={restaurant.id}>
                 <Link to={`/restaurant/restaurantDetail/${restaurant.id}`} className='text-blue-600'>
                   {restaurant.name}
                 </Link>
-              </li> 
+              </li>
             ))}
           </ol>
         </div>
-        <div className="grid grid-cols-2 gap-5">
-          <Link to="/restaurant/addRestaurant" className="text-white text-center bg-blue-700 col-span-2 hover:bg-blue-800 focus:ring-4 outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Add New Restaurant</Link>
+        <div className="restaurant-grid restaurant-card-grid">
           {restaurants.map((restaurant) => (
-            <div key={restaurant.id} className="flex items-center border-2 border-slate-100 gap-5 shadow-2xl rounded-2xl p-4">
-                <img src={restaurant.image} alt="Restaurant Image" className='w-14 h-14 object-cover' />
-                <Link to={`/restaurant/restaurantDetail/${restaurant.id}`} className='text-blue-600'>
-                  {restaurant.name}
-                </Link>
+            <div key={restaurant.id} className="flex-row restauratCard shadow">
+              <img src={restaurant.image} alt="Restaurant Image" className='w-14 h-14 object-cover' />
+              <Link to={`/restaurant/restaurantDetail/${restaurant.restaurantid}`} className='text-blue-600'>
+                {restaurant.name}
+              </Link>
             </div>
           ))}
         </div>

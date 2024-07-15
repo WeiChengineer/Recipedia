@@ -4,67 +4,101 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate, useParams } from 'react-router-dom';
 import SectionWrapper from '../../../SectionWrapper';
+import '../../../../css/common.css';
+import Swal from 'sweetalert2';
+import { useCookies } from 'react-cookie';
 
 const reviewSchema = z.object({
     content: z.string().min(1, 'Content is required'),
     rating: z.number().min(1, 'Rating must be at least 1').max(5, 'Rating must be at most 5'),
-    user_id: z.string(),
-    recipe_id: z.string(),
+    userid: z.number(),
+    recipeid: z.number(),
     date: z.string()
 });
 
 const ReviewForm = () => {
-    const navigate = useNavigate()
+    const navigate = useNavigate();
     const { slug } = useParams();
+    const [cookies] = useCookies();
 
-    const { register, handleSubmit,setValue, formState: { errors } } = useForm({
+
+    const { register, handleSubmit, setValue, formState: { errors } } = useForm({
         resolver: zodResolver(reviewSchema)
     });
 
-    useEffect(()=>{
-        setValue('user_id', slug)
-        setValue('recipe_id',slug)
-        setValue('date', new Date().toISOString())
-    },[slug])
+    useEffect(() => {
+
+        setValue('userid', cookies.auth.userid);
+        setValue('recipeid', parseInt(slug, 10));
+        setValue('date', new Date().toISOString());
+    }, [slug, setValue]);
 
     const onSubmit = async (data) => {
         console.log("data is", data);
         try {
-            const response = await fetch('http://localhost:3000/reviews', {
+            const response = await fetch('http://localhost:8000/api/reviews/addReview', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(data)
             });
-            if (response.ok) {
-                console.log('Review submitted successfully');
-                navigate(-1);
+            const result = await response.json();
+            if (result.status===200) {
+                Swal.fire({
+                    title: 'Success',
+                    text: 'Review submitted successfully!',
+                    icon: 'success',
+                    confirmButtonText: 'Okay'
+                }).then(() => {
+                    navigate(-1);
+                });
             } else {
-                console.error('Failed to submit review');
+                Swal.fire({
+                    title: 'Error',
+                    text: result.message,
+                    icon: 'error',
+                    confirmButtonText: 'Okay'
+                });
             }
         } catch (error) {
-            console.error('Error:', error);
+            Swal.fire({
+                title: 'Error',
+                text: error.message,
+                icon: 'error',
+                confirmButtonText: 'Okay'
+            });
         }
     };
 
     return (
         <SectionWrapper>
-            <div className=" mt-10 p-5 border border-gray-200 rounded-lg shadow-md">
-                <h2 className="text-2xl font-semibold mb-5">Submit a Review</h2>
-                <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="mt-10 p-5 border border-gray-200 rounded-lg shadow-md">
+                <h2 className="heading">Submit a Review</h2>
+                <form onSubmit={handleSubmit(onSubmit)} className='mt-4'>
                     <div className="mb-4">
-                        <label htmlFor="rating" className="block text-sm font-medium text-gray-700">Rating</label>
-                        <input type="number" step={0.1} id="rating" {...register('rating' ,{ valueAsNumber: true,setValueAs: (value) => parseFloat(value)})} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-                        {errors.rating && <span className="text-red-500 text-sm">{errors.rating.message}</span>}
+                        <label htmlFor="rating">Rating</label>
+                        <input 
+                            type="number" 
+                            step={0.1} 
+                            id="rating" 
+                            {...register('rating', { valueAsNumber: true })} 
+                        />
+                        {errors.rating && <span className="text-warning">{errors.rating.message}</span>}
                     </div>
                     <div className="mb-4">
-                        <label htmlFor="content" className="block text-sm font-medium text-gray-700">Content</label>
-                        <textarea id="content" rows={4} {...register('content')} className="mt-1 resize-none block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-                        {errors.content && <span className="text-red-500 text-sm">{errors.content.message}</span>}
+                        <label htmlFor="content">Content</label>
+                        <textarea 
+                            id="content" 
+                            rows={4} 
+                            {...register('content')} 
+                        />
+                        {errors.content && <span className="text-warning">{errors.content.message}</span>}
                     </div>
+                    <div>
 
-                    <button className=" bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">Submit Review</button>
+                    <button className="btn btn-primary">Submit Review</button>
+                    </div>
                 </form>
             </div>
         </SectionWrapper>

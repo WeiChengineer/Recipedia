@@ -5,8 +5,11 @@ import SectionWrapper from '../../../SectionWrapper';
 import { uploadImageHandler } from '../../../../utils/FirebaseImageUpload/uploadImage';
 import TagsInput from 'react-tagsinput';
 import 'react-tagsinput/react-tagsinput.css';
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import Swal from 'sweetalert2'
+import { useCookies } from 'react-cookie';
+import '../../../../css/common.css';
 
 const recipeSchema = z.object({
     name: z.string().min(1, "Name is required").max(255),
@@ -15,16 +18,26 @@ const recipeSchema = z.object({
     notes: z.string(),
     tags: z.array(z.string().min(1, "Tags are required")),
     image: z.string().min(1, "Image is required"),
-    restaurant_id:z.string().min(1,"Restaurant Id is required")
+    restaurantId: z.number(),
+    userId: z.number()
 });
 
 const AddRecipeForm = () => {
+    const navigate = useNavigate();
+    const { slug } = useParams();
+    const [cookies] = useCookies();
+
+
     const { register, handleSubmit, setError, setValue, getValues, formState: { errors } } = useForm({
         resolver: zodResolver(recipeSchema)
     });
-    
-    const { slug } = useParams();
-    setValue("restaurant_id",slug)
+
+
+    useEffect(() => {
+        setValue("restaurantId", parseInt(slug, 10));
+        setValue('userId', cookies.auth.userid);
+
+    }, [slug]);
 
     const [tags, setTags] = useState([]);
     const [steps, setSteps] = useState([]);
@@ -32,7 +45,7 @@ const AddRecipeForm = () => {
 
     const addRecipe = async (recipe) => { 
         try {
-            const response = await fetch('http://localhost:3000/recipes', {
+            const response = await fetch('http://localhost:8000/api/recipes/addRecipe', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -41,10 +54,37 @@ const AddRecipeForm = () => {
             });
             const result = await response.json();
             console.log(result);
-            alert('Recipe added successfully!');
+            if(result.status === 200)
+            {
+                Swal.fire({
+                    title: 'Success',
+                    text: 'Recipe added successfully!',
+                    icon:'success',
+                    confirmButtonText: 'Okay'
+                }).then(() => {
+                    navigate(-1);
+                })
+            }
+            else{
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Failed to add recipe.',
+                    icon:'error',
+                    confirmButtonText: 'Okay'
+                }).then(() =>{
+                    navigate(-1)
+                })
+            }
         }
         catch (error) {
-            console.error('Error adding recipe:', error);
+            Swal.fire({
+                title: 'Server Error',
+                text: 'Failed to add recipe.',
+                icon:'error',
+                confirmButtonText: 'Okay'
+            }).then(() =>{
+                navigate(-1)
+            });
         }
     }
 
@@ -72,8 +112,8 @@ const AddRecipeForm = () => {
     };
 
     const imageHandler = async (event) => {
-        const img = event.target.files[0]
-        const imageUrl = await uploadImageHandler(img)
+        const img = event.target.files[0];
+        const imageUrl = await uploadImageHandler(img);
 
         if (imageUrl === '404 error') {
             setError('image', {
@@ -83,54 +123,60 @@ const AddRecipeForm = () => {
             return;
         }
 
-        console.log("object", imageUrl)
+        console.log("object", imageUrl);
         setValue('image', imageUrl);
     }
 
     return (
         <SectionWrapper>
-            <form onSubmit={handleSubmit(onSubmit)} className="p-4 bg-white shadow-md rounded-lg">
-                <h1 className='font-bold text-center text-lg md:text-3xl'>Add New Recipe</h1>
+            <form onSubmit={handleSubmit(onSubmit)} className="p-4 shadow">
+                <h1 className='heading text-center'>Add New Recipe</h1>
                 <div className="mb-4">
-                    <label className="block text-gray-700">Name</label>
-                    <input {...register("name")} className="mt-1 p-2 border focus:ring-[#a5d24a] focus:ring-2 focus:border-none outline-none border-gray-300 rounded w-full" />
-                    {errors.name && <p className="text-red-500">{errors.name.message}</p>}
+                    <label className="mb-2">Name</label>
+                    <input {...register("name")} type='text' />
+                    {errors.name && <p className="text-warning">{errors.name.message}</p>}
                 </div>
                 <div className="mb-4">
-                    <label className="block py-2 text-gray-700">Ingredients</label>
+                    <label className="mb-2">Ingredients</label>
                     <TagsInput value={ingredients} onChange={handleIngredientsChange} placeholder="Add new Ingredients" />
-                    <label className='text-gray-400'>Press enter to add new ingredients</label>
-                    {errors.ingredients && <p className="text-red-500">{errors.ingredients.message}</p>}
+                    <label style={{
+                        color: 'gray'
+                    }}>Press enter to add new ingredients</label>
+                    {errors.ingredients && <p className="text-warning">{errors.ingredients.message}</p>}
                 </div>
 
                 <div className="mb-4">
-                    <label className="block py-2 text-gray-700">Steps</label>
+                    <label className="mb-2">Steps</label>
                     <TagsInput value={steps} onChange={handleStepsChange} placeholder="Add new Steps" />
-                    <label className='text-gray-400'>Press enter to add new steps</label>
-                    {errors.steps && <p className="text-red-500">{errors.steps.message}</p>}
+                    <label style={{
+                        color: 'gray'
+                    }}>Press enter to add new steps</label>
+                    {errors.steps && <p className="text-warning">{errors.steps.message}</p>}
                 </div>
 
                 <div className="mb-4">
-                    <label className="block text-gray-700">Notes</label>
+                    <label className="mb-2">Notes</label>
                     <textarea
                         rows={4}
                         {...register("notes")} className="mt-1 p-2 border focus:ring-[#a5d24a] focus:ring-2 focus:border-none outline-none border-gray-300 rounded w-full resize-none" />
                 </div>
 
                 <div className="mb-4">
-                    <label className="block py-2 text-gray-700">Tags</label>
+                    <label className="mb-2">Tags</label>
                     <TagsInput value={tags} onChange={handleTagsChange} placeholder="Add new Tags" />
-                    <label className='text-gray-400'>Press enter to add new tags</label>
-                    {errors.tags && <p className="text-red-500">{errors.tags.message}</p>}
+                    <label style={{
+                        color: 'gray'
+                    }}>Press enter to add new tags</label>
+                    {errors.tags && <p className="text-warning">{errors.tags.message}</p>}
                 </div>
 
                 <div className="mb-4">
-                    <label className="block text-gray-700">Image</label>
+                    <label className="mb-2">Image</label>
                     <input type="file" onChange={imageHandler} className="mt-1 p-2 border focus:ring-[#a5d24a] focus:ring-2 focus:border-none outline-none border-gray-300 rounded w-full" />
-                    {errors.image && <p className="text-red-500">{errors.image.message}</p>}
+                    {errors.image && <p className="text-warning">{errors.image.message}</p>}
                 </div>
 
-                <button className="bg-blue-500 text-white p-2 rounded">Submit</button>
+                <button className="btn btn-primary">Submit</button>
             </form>
         </SectionWrapper>
     );

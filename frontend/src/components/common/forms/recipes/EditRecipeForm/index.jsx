@@ -7,6 +7,8 @@ import SectionWrapper from '../../../SectionWrapper';
 import { uploadImageHandler } from '../../../../utils/FirebaseImageUpload/uploadImage';
 import TagsInput from 'react-tagsinput';
 import 'react-tagsinput/react-tagsinput.css';
+import Swal from 'sweetalert2';
+import { useCookies } from 'react-cookie';
 
 const recipeSchema = z.object({
     name: z.string().min(1, "Name is required").max(255),
@@ -14,7 +16,9 @@ const recipeSchema = z.object({
     steps: z.array(z.string().min(1, "Steps are required")),
     notes: z.string(),
     tags: z.array(z.string().min(1, "Tags are required")),
-    image: z.string().min(1, "Image is required")
+    image: z.string().min(1, "Image is required"),
+    restaurantId: z.number(),
+    userId: z.number()
 });
 
 const EditRecipeForm = () => {
@@ -23,6 +27,8 @@ const EditRecipeForm = () => {
     const { register, handleSubmit, setError, setValue, getValues, formState: { errors } } = useForm({
         resolver: zodResolver(recipeSchema)
     });
+    const [cookies] = useCookies();
+
 
     const [tags, setTags] = useState([]);
     const [steps, setSteps] = useState([]);
@@ -31,31 +37,38 @@ const EditRecipeForm = () => {
 
     const fetchRecipe = async () => {
         try {
-            const response = await fetch(`http://localhost:3000/recipes/${slug}`);
-            const data = await response.json();
-            console.log('recipe details=====>', data);
-            setRecipe(data);
-            setValue("name", data.name);
-            setValue("ingredients", data.ingredients);
-            setIngredients(data.ingredients);
-            setValue("steps", data.steps);
-            setSteps(data.steps);
-            setValue("notes", data.notes);
-            setValue("tags", data.tags);
-            setTags(data.tags);
-            setValue("image", data.image);
+            const response = await fetch(`http://localhost:8000/api/recipes/${slug}`);
+            const result = await response.json();
+            let data=result.data;
+            if(result.status===200)
+            {
+                console.log('recipe details=====>', data);
+                setRecipe(data);
+                setValue("name", data.name);
+                setValue("ingredients", data.ingredients);
+                setIngredients(data.ingredients);
+                setValue("steps", data.steps);
+                setSteps(data.steps);
+                setValue("notes", data.notes);
+                setValue("tags", data.tags);
+                setTags(data.tags);
+                setValue("image", data.image);
+            }
         } catch (error) {
             console.log('error in fetching recipe details=====>', error);
         }
     };
 
     useEffect(() => {
+        setValue("restaurantId", parseInt(slug, 10));
+        setValue('userId', cookies.auth.userid);
+ 
         fetchRecipe();
     }, [slug]);
 
     const updateRecipe = async (recipe) => {
         try {
-            const response = await fetch(`http://localhost:3000/recipes/${slug}`, {
+            const response = await fetch(`http://localhost:8000/api/recipes/updateRecipe/${slug}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -63,11 +76,34 @@ const EditRecipeForm = () => {
                 body: JSON.stringify(recipe)
             });
             const result = await response.json();
-            console.log(result);
-            alert('Recipe updated successfully!');
-            navigate('/recipes');
+            if(result.status === 200){
+                Swal.fire({
+                    title: 'Success',
+                    text: 'Recipe updated successfully!',
+                    icon:'success',
+                    confirmButtonText: 'Okay'
+                }).then(() => {
+                    navigate(-1);
+                })
+            }else{
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Failed to update recipe.',
+                    icon:'error',
+                    confirmButtonText: 'Okay'
+                }).then(() => {
+                    navigate(-1);
+                })
+            }
         } catch (error) {
-            console.error('Error updating recipe:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Failed to update recipe.',
+                icon:'error',
+                confirmButtonText: 'Okay'
+            }).then(() => {
+                navigate(-1);
+            })
         }
     }
 

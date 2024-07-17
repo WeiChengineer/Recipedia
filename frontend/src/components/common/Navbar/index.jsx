@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import "../../css/navbar.css";
-import { useCookies } from "react-cookie";
 import UserInformation from "./UserInformation";
+import { useCookies } from "react-cookie";
 
 const Navbar = () => {
-  const [cookies, removeCookie] = useCookies();
-  const [userExist, setUserExist] = useState();
+  const [cookies] = useCookies();
+  const [userExist, setUserExist] = useState(false);
 
   useEffect(() => {
-    if (cookies.auth !== undefined) {
+    if (typeof cookies.auth === "object") {
       setUserExist(true);
-    } else setUserExist(false);
-  }, []);
+    } else {
+      setUserExist(false);
+    }
+  }, [cookies]);
 
   const location = useLocation();
   const pathname = location.pathname.replace(/^\//, "");
@@ -77,11 +79,8 @@ const Navbar = () => {
                 </li>
               ))}
               <li className="nav-item">
-                {userExist && userExist ? (
-                  <UserInformation
-                    cookies={cookies}
-                    removeCookie={removeCookie}
-                  />
+                {userExist ? (
+                  <UserInformation />
                 ) : (
                   <Link
                     id="signup"
@@ -94,14 +93,6 @@ const Navbar = () => {
                     Login
                   </Link>
                 )}
-                {/* <Link
-                                    id="signup"
-                                    to="/auth/login"
-                                    className="nav-link login-link"
-                                    aria-current={pathname === "auth/login" ? "page" : undefined}
-                                >
-                                    Login
-                                </Link> */}
               </li>
             </ul>
           </div>

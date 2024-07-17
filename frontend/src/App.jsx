@@ -19,6 +19,7 @@ import RecipeDetail from "./components/pages/Recipes/RecipeDetail";
 import AddReviewForm from "./components/common/forms/review/AddReviewForm";
 import EditReviewForm from "./components/common/forms/review/EditReviewForm";
 import RecipeSearchAndFilter from "./components/pages/RecipeSearchAndFilter";
+import UpdateUser from "./components/authentication/Update/Index";
 const App = () => {
   return (
     <>
@@ -39,6 +40,7 @@ const App = () => {
         <Route path="/categories" element={<Categories />} />
         <Route path="/auth/signup" element={<Signup />} />
         <Route path="/auth/login" element={<Login />} />
+        <Route path="/auth/updateUser" element={<UpdateUser />} />
         <Route
           path="/restaurant/addRestaurant"
           element={<AddRestaurantForm />}

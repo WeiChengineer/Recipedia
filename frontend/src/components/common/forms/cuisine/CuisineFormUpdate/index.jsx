@@ -29,7 +29,7 @@ const CuisineFormUpdate = () => {
   });
 
   const [cookies] = useCookies();
-  setValue('userId', cookies.auth.userid);
+  setValue('userId', cookies.auth.userId);
 
   const getCuisine = async () => {
     try {

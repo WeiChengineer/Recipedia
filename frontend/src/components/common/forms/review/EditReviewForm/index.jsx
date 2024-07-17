@@ -42,7 +42,7 @@ const EditReviewForm = () => {
     };
 
     useEffect(() => {
-        setValue('userid', cookies.auth.userid);
+        setValue('userid', cookies.auth.userId);
         setValue('recipeid', parseInt(slug, 10));
         setValue('date', new Date().toISOString());
         fetchReview();

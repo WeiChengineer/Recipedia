@@ -22,7 +22,7 @@ const RecipeDetail = () => {
 
     const checkSameUser = (user_id) => {
         if (cookies.auth !== undefined) {
-            return cookies.auth.userid === user_id;
+            return cookies.auth.userId === user_id;
         }
         return false;
     }
@@ -53,7 +53,7 @@ const RecipeDetail = () => {
 
     const addToFavorites = async () => {
         const requestData = {
-            userId: cookies.auth.userid,
+            userId: cookies.auth.userId,
             recipeId: parseInt(slug, 10),
         };
 
@@ -135,7 +135,7 @@ const RecipeDetail = () => {
     useEffect(() => {
         setIsUserLoggedIn(checkUserExist());
         if (recipe) {
-            setIsSameUser(checkSameUser(recipe.userid));
+            setIsSameUser(checkSameUser(recipe.userId));
         }
     }, [cookies, recipe]);
 
@@ -180,10 +180,10 @@ const RecipeDetail = () => {
                 <div className="action-buttons">
                     {
                         isUserLoggedIn && 
-                    <Link to={`/review/addReview/${recipe.recipeid}`} className="action-button">Add Review</Link>
+                    <Link to={`/review/addReview/${recipe.recipeId}`} className="action-button">Add Review</Link>
                     }
                     {isSameUser && (<>
-                        <Link to={`/recipes/editRecipesForm/${recipe.recipeid}`} className="action-button">Edit Recipe</Link>
+                        <Link to={`/recipes/editRecipesForm/${recipe.recipeId}`} className="action-button">Edit Recipe</Link>
                         <button onClick={deleteRecipe} className="action-button delete-button">Delete Recipe</button>
                     </>
                     )}

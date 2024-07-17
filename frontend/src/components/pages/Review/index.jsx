@@ -12,13 +12,13 @@ const Review = ({ id  }) => {
     const isSameUser = ()=>{
         if(cookies.auth !== undefined)
         {
-            return cookies.auth.userid === reviews.userid;
+            return cookies.auth.userId === reviews.userId;
         }
     }
 
     const getReviews = async (id) => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/api/recipe/reviews/${id}`);
+            const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/api/recipes/reviews/${id}`);
             const data = await response.json();
             if (data.status === 200) {
                 setReviews(data.data);

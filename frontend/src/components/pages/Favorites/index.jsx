@@ -12,8 +12,8 @@ const Favorites = () => {
   useEffect(() => {
     if (cookies.auth !== undefined) {
       setUserExist(true);
-      setUserid(cookies.auth.userid);
-      console.log("user id is", cookies.auth.userid);
+      setUserid(cookies.auth.userId);
+      console.log("user id is", cookies.auth.userId);
     }
     else
       setUserExist(false);
@@ -54,7 +54,7 @@ const Favorites = () => {
               <div className="card-content flex">
                 <h2>{recipe.name}</h2>
                 <p> {recipe.notes}   </p>
-                <Link to={`/recipes/recipesDetail/${recipe.recipeid}`} className="btn btn-primary">
+                <Link to={`/recipes/recipesDetail/${recipe.recipeId}`} className="btn btn-primary">
                   More Detail
                 </Link>
               </div>

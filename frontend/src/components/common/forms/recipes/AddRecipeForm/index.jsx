@@ -35,7 +35,7 @@ const AddRecipeForm = () => {
 
     useEffect(() => {
         setValue("restaurantId", parseInt(slug, 10));
-        setValue('userId', cookies.auth.userid);
+        setValue('userId', cookies.auth.userId);
 
     }, [slug]);
 

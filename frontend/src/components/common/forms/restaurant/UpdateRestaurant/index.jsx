@@ -41,7 +41,7 @@ const UpdateRestaurantForm = () => {
       .then(response => response.json())
       .then(data => {
         const formattedCuisines = data.data.map(cuisine => ({
-          value: cuisine.cuisineid,
+          value: cuisine.cuisineId,
           label: cuisine.name
         }));
 

@@ -61,7 +61,7 @@ const EditRecipeForm = () => {
 
     useEffect(() => {
         setValue("restaurantId", parseInt(slug, 10));
-        setValue('userId', cookies.auth.userid);
+        setValue('userId', cookies.auth.userId);
  
         fetchRecipe();
     }, [slug]);

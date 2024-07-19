@@ -9,10 +9,16 @@ import { useCookies } from "react-cookie";
 import { useEffect, useState } from "react";
 
 const schema = z.object({
-  email: z.string().email("Invalid email format").min(1, "Email is required"),
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  profileImage: z.string().min(8, "Profile image is required"),
+  email: z.string().min(1, "Email is required").email("Invalid email format"),
+  username: z
+    .string()
+    .min(1, "Username is required")
+    .refine((s) => !s.includes(" "), "Whitespaces not allowed"),
+  password: z
+    .string()
+    .min(2, "Password is required")
+    .refine((s) => !s.includes(" "), "Whitespaces not allowed"),
+  profileImage: z.string().min(1, "Profile image is required"),
 });
 
 const UpdateUser = () => {

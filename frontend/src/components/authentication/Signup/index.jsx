@@ -5,12 +5,19 @@ import { Link, useNavigate } from "react-router-dom";
 import { uploadImageHandler } from "../../utils/FirebaseImageUpload/uploadImage";
 import "../../css/signup.css";
 import Swal from "sweetalert2";
+import { useState } from "react";
 
 const schema = z.object({
-  email: z.string().email("Invalid email format").min(1, "Email is required"),
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  profileImage: z.string().min(8, "Profile image is required"),
+  email: z.string().min(1, "Email is required").email("Invalid email format"),
+  username: z
+    .string()
+    .min(1, "Username is required")
+    .refine((s) => !s.includes(" "), "Whitespaces not allowed"),
+  password: z
+    .string()
+    .min(1, "Password is required")
+    .refine((s) => !s.includes(" "), "Whitespaces not allowed"),
+  profileImage: z.string().min(1, "Profile image is required"),
 });
 
 const Signup = () => {
@@ -24,12 +31,17 @@ const Signup = () => {
   } = useForm({
     resolver: zodResolver(schema),
   });
+  const [loading, setLoading] = useState(false);
+
+  console.log("LOADING ======== ", loading);
 
   const imageHandler = async (event) => {
+    setLoading(true);
     const image = event.target.files[0];
     const imageUrl = await uploadImageHandler(image);
 
     if (imageUrl === "404 error") {
+      setLoading(false);
       setError("profileImage", {
         type: "manual",
         message: "Image upload failed",
@@ -38,6 +50,7 @@ const Signup = () => {
     }
 
     console.log("object", imageUrl);
+    setLoading(false);
     setValue("profileImage", imageUrl);
   };
 
@@ -155,8 +168,14 @@ const Signup = () => {
               <p className="text-warning">{errors.profileImage.message}</p>
             )}
           </div>
-          <button type="submit" className="btn btn-primary">
-            Create an account
+          <button
+            type="submit"
+            className="btn btn-primary"
+            style={{
+              background: loading ? "grey" : "",
+            }}
+          >
+            {loading ? "Uploading image..." : "Create an account"}
           </button>
           <p>
             Already have an account?{" "}

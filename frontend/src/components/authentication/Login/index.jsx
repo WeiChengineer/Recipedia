@@ -1,16 +1,20 @@
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link, useNavigate } from "react-router-dom";
 import "../../css/login.css";
 import "../../css/common.css";
+import "./style.css";
 import { useCookies } from "react-cookie";
 import Swal from "sweetalert2";
 import "sweetalert2/src/sweetalert2.scss";
 
 const schema = z.object({
-  email: z.string().email("Invalid email format").min(1, "Email is required"),
-  password: z.string().min(6, "Password is required"),
+  email: z.string().min(1, "Email is required").email("Invalid email format"),
+  password: z
+    .string()
+    .min(1, "Password is required")
+    .refine((s) => !s.includes(" "), "Whitespaces not allowed"),
 });
 
 const Login = () => {
@@ -20,6 +24,7 @@ const Login = () => {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(schema),
@@ -61,6 +66,19 @@ const Login = () => {
     }
   };
 
+  const loginDemoUser = async (event) => {
+    event.preventDefault();
+    const email = "demouser@gmail.com";
+    const password = "demouser123";
+    setValue("email", email);
+    setValue("password", password);
+    // await new Promise((resolve) => setTimeout(() => resolve, 5000));
+    setTimeout(async () => {
+      console.log("CONTROL ============");
+      await onSubmit({ email, password });
+    }, 2000);
+  };
+
   return (
     <div className="form-center">
       <div className="shadow p-5 ">
@@ -94,9 +112,17 @@ const Login = () => {
               <p className="text-warning">{errors.password.message}</p>
             )}
           </div>
-          <button type="submit" className="btn btn-primary mt-3">
-            Sign in
-          </button>
+          <div className="action-buttons">
+            <button
+              type="submit"
+              className="btn btn-primary mt-3 action-button-left"
+            >
+              Sign in
+            </button>
+            <button className="action-button-right" onClick={loginDemoUser}>
+              Demo user
+            </button>
+          </div>
           <p className="text-sm font-light text-gray-800">
             Don’t have an account yet?{" "}
             <Link to="/auth/signup" className="auth-link">

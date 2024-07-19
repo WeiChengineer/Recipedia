@@ -76,7 +76,9 @@ router.post("/auth/login", async (req, res) => {
       where: { email },
     });
 
-    if (!user || !(await validatePassword(password, user.password))) {
+    const comparedPassword = await validatePassword(password, user.password);
+
+    if (!user || !comparedPassword) {
       return res.status(404).json({ status: 404, message: "User not found" });
     }
 
@@ -106,7 +108,7 @@ router.put("/update/:id", async (req, res) => {
 
     const updatedUser = await user.update({ username, email, password, image });
 
-    return res.json({ status: 200, data: updatedUser, redirect : '/' });
+    return res.json({ status: 200, data: updatedUser, redirect: "/" });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Server error" });

@@ -50,47 +50,47 @@ const EditReviewForm = () => {
 
     const onSubmit = async (data) => {
         console.log(data)
-        try {
-            const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/api/reviews/updateReview/${slug}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
+        // try {
+        //     const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/api/reviews/updateReview/${slug}`, {
+        //         method: 'PUT',
+        //         headers: {
+        //             'Content-Type': 'application/json'
+        //         },
+        //         body: JSON.stringify(data)
+        //     });
 
-            const result = await response.json();
-            console.log("object updated successfully", result)
-            if (result.status === 200) {
-                Swal.fire({
-                    title: 'Success',
-                    text: 'Review updated successfully!',
-                    icon:'success',
-                    confirmButtonText: 'Okay'
-                }).then(() => {
-                    navigate(-1);
-                })
+        //     const result = await response.json();
+        //     console.log("object updated successfully", result)
+        //     if (result.status === 200) {
+        //         Swal.fire({
+        //             title: 'Success',
+        //             text: 'Review updated successfully!',
+        //             icon:'success',
+        //             confirmButtonText: 'Okay'
+        //         }).then(() => {
+        //             navigate(-1);
+        //         })
                
-            } else {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Failed to update review',
-                    icon: 'error',
-                    confirmButtonText: 'Okay'
-                }).then(()=>{
-                    navigate(-1);
-                })
-            }
-        } catch (error) {
-            Swal.fire({
-                title: 'Error',
-                text: 'Failed to update review',
-                icon: 'error',
-                confirmButtonText: 'Okay'
-            }).then(()=>{
-                navigate(-1);
-            })
-        }
+        //     } else {
+        //         Swal.fire({
+        //             title: 'Error',
+        //             text: 'Failed to update review',
+        //             icon: 'error',
+        //             confirmButtonText: 'Okay'
+        //         }).then(()=>{
+        //             navigate(-1);
+        //         })
+        //     }
+        // } catch (error) {
+        //     Swal.fire({
+        //         title: 'Error',
+        //         text: 'Failed to update review',
+        //         icon: 'error',
+        //         confirmButtonText: 'Okay'
+        //     }).then(()=>{
+        //         navigate(-1);
+        //     })
+        // }
     };
     return (
         <SectionWrapper>

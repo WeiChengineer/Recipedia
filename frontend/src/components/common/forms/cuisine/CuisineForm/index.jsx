@@ -11,10 +11,10 @@ import Select from "react-select";
 import countryList from "react-select-country-list";
 
 const schema = z.object({
-  name: z.string().min(1, { message: "Name is required" }),
-  description: z.string().min(1, { message: "Description is required" }),
-  country: z.string().min(1, { message: "Country is required" }),
-  value: z.string().min(1, { message: "Value is required" }),
+  name: z.string().min(1, "Name is required").trim(),
+  description: z.string().min(1, "Description is required").trim(),
+  country: z.string().min(1, "Country is required"),
+  value: z.string().min(1, "Value is required"),
   userId: z.number().optional(),
 });
 
@@ -28,7 +28,7 @@ const CuisineForm = () => {
     resolver: zodResolver(schema),
   });
   const [cookies] = useCookies();
-  console.log("COOKIES ===== ", cookies)
+  console.log("COOKIES ===== ", cookies);
   const navigate = useNavigate();
 
   useEffect(() => {

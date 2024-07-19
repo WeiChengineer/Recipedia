@@ -16,9 +16,9 @@ const RecipeDetail = () => {
   const [isSameUser, setIsSameUser] = useState(false);
   const [cookies] = useCookies();
 
-  // const checkUserExist = () => {
-  //   return cookies.auth !== undefined;
-  // };
+  const checkUserExist = () => {
+    return cookies.auth !== undefined;
+  };
 
   const checkSameUser = (user_id) => {
     if (cookies.auth !== undefined) {
@@ -141,7 +141,7 @@ const RecipeDetail = () => {
   }, [slug]);
 
   useEffect(() => {
-    // setIsUserLoggedIn(checkUserExist());
+    setIsUserLoggedIn(checkUserExist());
     if (recipe) {
       setIsSameUser(checkSameUser(recipe.userId));
     }

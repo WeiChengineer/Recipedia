@@ -9,7 +9,7 @@ import Swal from "sweetalert2";
 import { useCookies } from "react-cookie";
 
 const reviewSchema = z.object({
-  content: z.string().min(1, "Content is required").trim(),
+  content: z.string().trim().min(1, "Content is required").trim(),
   rating: z
     .number()
     .min(1, "Rating must be at least 1")

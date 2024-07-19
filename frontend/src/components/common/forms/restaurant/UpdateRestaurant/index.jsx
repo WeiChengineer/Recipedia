@@ -9,14 +9,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import { uploadImageHandler } from "../../../../utils/FirebaseImageUpload/uploadImage";
 
 const schema = z.object({
-  name: z.string().min(1, "Name is required"),
-  location: z.string().min(1, "Location is required"),
+  name: z.string().trim().min(1, "Name is required"),
+  location: z.string().trim().min(1, "Location is required"),
   rating: z
     .number()
     .min(1, "Rating must be between 1 and 5")
     .max(5, "Rating must be between 1 and 5")
     .multipleOf(0.1),
-  notes: z.string().min(1, "Notes are required"),
+  notes: z.string().trim().min(1, "Notes are required"),
   image: z.string().min(1, "Image is required"),
   cuisineId: z.number(),
   userId: z.number().optional(),

@@ -12,10 +12,10 @@ import { useCookies } from "react-cookie";
 import "../../../../css/common.css";
 
 const recipeSchema = z.object({
-  name: z.string().min(1, "Name is required").max(255),
+  name: z.string().trim().min(1, "Name is required").max(255),
   ingredients: z.array(z.string().min(1, "Ingredients are required")),
   steps: z.array(z.string().min(1, "Steps are required")),
-  notes: z.string(),
+  notes: z.string().trim().min(1, "Note is required"),
   tags: z.array(z.string().min(1, "Tags are required")),
   image: z.string().min(1, "Image is required"),
   restaurantId: z.number(),
@@ -229,6 +229,7 @@ const AddRecipeForm = () => {
             {...register("notes")}
             className="mt-1 p-2 border focus:ring-[#a5d24a] focus:ring-2 focus:border-none outline-none border-gray-300 rounded w-full resize-none"
           />
+          {errors.notes && <p className="text-warning">{errors.notes.message}</p>}
         </div>
 
         <div className="mb-4">

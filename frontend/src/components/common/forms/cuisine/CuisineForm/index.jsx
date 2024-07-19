@@ -11,8 +11,8 @@ import Select from "react-select";
 import countryList from "react-select-country-list";
 
 const schema = z.object({
-  name: z.string().min(1, "Name is required").trim(),
-  description: z.string().min(1, "Description is required").trim(),
+  name: z.string().trim().min(1, "Name is required"),
+  description: z.string().trim().min(1, "Description is required"),
   country: z.string().min(1, "Country is required"),
   value: z.string().min(1, "Value is required"),
   userId: z.number().optional(),

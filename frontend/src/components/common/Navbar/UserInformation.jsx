@@ -96,7 +96,7 @@ const UserInformation = () => {
       {user && (
         <div className="profile" onClick={toggleMenu} ref={profileRef}>
           <div className="img-box">
-            <img src={user?.image} alt="User" />
+            <img src={user?.image ?? "/avatar.png"} alt="User" />
           </div>
           {menuActive && (
             <div className="menu active">

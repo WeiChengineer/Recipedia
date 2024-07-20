@@ -20,6 +20,7 @@ const Search = () => {
     register,
     handleSubmit,
     setValue,
+    reset,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(searchSchema),
@@ -55,7 +56,7 @@ const Search = () => {
     try {
       console.log("Search", data);
       const response = await fetch(
-        `${import.meta.env.VITE_API_ENDPOINT}/api/searchAndFilter`,
+        `${import.meta.env.VITE_API_ENDPOINT}/api/search`,
         {
           method: "POST",
           headers: {
@@ -78,8 +79,10 @@ const Search = () => {
         });
         console.error("Error searching:", result.message);
       }
+      reset();
     } catch (error) {
       console.error("Error searching:", error);
+      reset();
     }
   };
 
@@ -121,8 +124,19 @@ const Search = () => {
         )}
 
         {isSearch && (
-          <div className="grid grid-sm-2">
-            <div className="mb-4">
+          <div
+            style={{
+              margin: "20px 0px",
+              display: "flex",
+              gap: "20px",
+            }}
+          >
+            <div
+              style={{
+                flexGrow: 1,
+                width: 0,
+              }}
+            >
               <label>Select Category</label>
               <Select
                 options={cuisineOptions}
@@ -130,14 +144,18 @@ const Search = () => {
                 isClearable
               />
             </div>
-            <div className="mb-4">
+            <div
+              style={{
+                flexGrow: 1,
+                width: 0,
+              }}
+            >
               <div>
                 <label>Tags</label>
                 <input
-                  type="text"
+                  type="search"
                   {...register("tags")}
-                  className="p-7 search_Inputtags"
-                  placeholder="Enter a tag"
+                  placeholder="Enter a tag to search"
                 />
                 {errors.tags && (
                   <p className="text-warning">{errors.tags.message}</p>

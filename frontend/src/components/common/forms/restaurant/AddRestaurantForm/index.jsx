@@ -9,16 +9,34 @@ import { useNavigate } from "react-router-dom";
 import { uploadImageHandler } from "../../../../utils/FirebaseImageUpload/uploadImage";
 import "../../../../css/common.css";
 import { useCookies } from "react-cookie";
+import { hasWhitespaceAtEdges } from "../../../../../../utils/strings";
 
 const schema = z.object({
-  name: z.string().trim().min(1, "Name is required"),
-  location: z.string().trim().min(1, "Location is required"),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .refine((string) => !hasWhitespaceAtEdges(string), {
+      message: "Name cannot start with whitespace",
+    }),
+  location: z
+    .string()
+    .min(1, "Location is required")
+    .min(1, "Name is required")
+    .refine((string) => !hasWhitespaceAtEdges(string), {
+      message: "Location cannot start with whitespace",
+    }),
   rating: z
     .number()
     .min(1, "Rating must be between 1 and 5")
     .max(5, "Rating must be between 1 and 5")
     .multipleOf(0.1),
-  notes: z.string().trim().min(1, "Notes are required"),
+  notes: z
+    .string()
+    .min(1, "Notes are required")
+    .min(1, "Name is required")
+    .refine((string) => !hasWhitespaceAtEdges(string), {
+      message: "Notes cannot start with whitespace",
+    }),
   image: z.string().min(1, "Image is required"),
   cuisineId: z.number(),
   userId: z.number().optional(),
@@ -28,7 +46,7 @@ const defaultValues = {
   name: "",
   location: "",
   cuisineId: null,
-  rating: 5,
+  rating: 1,
   notes: "",
   image: "",
 };
@@ -127,6 +145,7 @@ const AddRestaurantForm = () => {
   };
 
   const onSubmit = (data) => {
+    console.log("DATA ======= ", data)
     addNewRestaurant(data);
   };
 

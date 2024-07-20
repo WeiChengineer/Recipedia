@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import StarRatings from "react-star-ratings";
 import Swal from "sweetalert2";
 import "../../css/review.css";
 import { useCookies } from "react-cookie";
 
-const Review = ({ id }) => {
-  console.log("Review", id);
+const Review = ({ id: recipeId }) => {
   const [reviews, setReviews] = useState([]);
   const [cookies] = useCookies();
   const [isSameUser, setIsSameUser] = useState(false);
@@ -30,10 +29,10 @@ const Review = ({ id }) => {
   //   }
   // }, [cookies, reviews]);
 
-  const getReviews = async (id) => {
+  const getReviews = async (recipeId) => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_ENDPOINT}/api/recipes/reviews/${id}`
+        `${import.meta.env.VITE_API_ENDPOINT}/api/recipes/reviews/${recipeId}`
       );
       const data = await response.json();
       if (data.status === 200) {
@@ -85,8 +84,8 @@ const Review = ({ id }) => {
   };
 
   useEffect(() => {
-    getReviews(id);
-  }, [id]);
+    getReviews(recipeId);
+  }, [recipeId]);
 
   return (
     <div className="review-container">
@@ -113,7 +112,7 @@ const Review = ({ id }) => {
                 {checkSameUser(review.userId) && (
                   <div className="review-actions">
                     <Link
-                      to={`/review/updateReview/${review.reviewId}`}
+                      to={`/review/updateReview/${recipeId}/${review.reviewId}`}
                       className="edit-button"
                     >
                       Edit

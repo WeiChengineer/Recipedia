@@ -9,10 +9,21 @@ import { useCookies } from "react-cookie";
 import SectionWrapper from "../../../SectionWrapper";
 import Select from "react-select";
 import countryList from "react-select-country-list";
+import { hasWhitespaceAtEdges } from "../../../../../../utils/strings";
 
 const schema = z.object({
-  name: z.string().trim().min(1, "Name is required"),
-  description: z.string().trim().min(1, "Description is required"),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .refine((string) => !hasWhitespaceAtEdges(string), {
+      message: "Name cannot start with whitespace",
+    }),
+  description: z
+    .string()
+    .min(1, "Description is required")
+    .refine((string) => !hasWhitespaceAtEdges(string), {
+      message: "Description cannot start with whitespace",
+    }),
   country: z.string().min(1, "Country is required"),
   value: z.string().min(1, "Value is required"),
   userId: z.number().optional(),
@@ -28,7 +39,6 @@ const CuisineForm = () => {
     resolver: zodResolver(schema),
   });
   const [cookies] = useCookies();
-  console.log("COOKIES ===== ", cookies);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -115,6 +125,9 @@ const CuisineForm = () => {
             {...register("description")}
             rows={6}
             className="form-control"
+            style={{
+              padding : '10px',
+            }}
           ></textarea>
           {errors.description && (
             <p className="mt-2 text-warning">{errors.description.message}</p>

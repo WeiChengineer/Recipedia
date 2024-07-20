@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import SectionWrapper from "../../common/SectionWrapper";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import Review from "../Review";
 import Swal from "sweetalert2";
@@ -15,6 +15,8 @@ const RecipeDetail = () => {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const [isSameUser, setIsSameUser] = useState(false);
   const [cookies] = useCookies();
+  const [favorites, setFavorites] = useState([]);
+  const location = useLocation();
 
   const checkUserExist = () => {
     return cookies.auth !== undefined;
@@ -26,6 +28,20 @@ const RecipeDetail = () => {
     }
     return false;
   };
+
+  const getFavorites = async () => {
+    const result = await fetch(
+      `${import.meta.env.VITE_API_ENDPOINT}/api/favorites/${
+        cookies.auth.userId
+      }`
+    );
+    const data = await result.json();
+    if (result.status === 200) setFavorites(data.data);
+  };
+
+  useEffect(() => {
+    getFavorites();
+  }, [cookies]);
 
   const getRecipe = async () => {
     try {
@@ -56,7 +72,7 @@ const RecipeDetail = () => {
   const addToFavorites = async () => {
     const requestData = {
       userId: cookies.auth.userId,
-      recipeId: parseInt(slug, 10),
+      recipeId: recipe.recipeId,
     };
 
     try {
@@ -80,6 +96,10 @@ const RecipeDetail = () => {
           icon: "success",
           confirmButtonText: "Okay",
         });
+        setFavorites((prevFavorites) => [
+          ...prevFavorites,
+          { recipeId: recipe.recipeId },
+        ]);
       } else {
         Swal.fire({
           title: "Error",
@@ -96,6 +116,50 @@ const RecipeDetail = () => {
         confirmButtonText: "Okay",
       });
     }
+  };
+
+  const removeFromFavorites = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_ENDPOINT}/api/favorites/deleteFavorite/${
+          recipe.recipeId
+        }`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      const responseData = await response.json();
+
+      if (response.ok) {
+        Swal.fire({
+          title: "Recipe deleted from favorites!",
+          text: "The recipe has been deleted from your favorites.",
+          icon: "success",
+          confirmButtonText: "Okay",
+        });
+        setFavorites((prevFavorites) =>
+          prevFavorites.filter(
+            (favorite) => favorite.recipeId !== recipe.recipeId
+          )
+        );
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: responseData.message || "Something went wrong!",
+          icon: "error",
+          confirmButtonText: "Okay",
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: error.message,
+        icon: "error",
+        confirmButtonText: "Okay",
+      });
+    }
+    navigate(location.pathname);
   };
 
   const deleteRecipe = async () => {
@@ -156,11 +220,22 @@ const RecipeDetail = () => {
       <div className="shadow p-5 recipe-detail-container">
         <h1 className="recipe-title">{recipe.name}</h1>
         <img className="recipe-image" src={recipe.image} alt={recipe.name} />
-        {isUserLoggedIn && (
-          <button className="btn btn-primary" onClick={addToFavorites}>
-            Add To Favorites
-          </button>
-        )}
+        {isUserLoggedIn &&
+          (favorites.some(
+            (favorite) => favorite.recipeId === recipe.recipeId
+          ) ? (
+            <button
+              className="btn btn-primary"
+              style={{ background: "red" }}
+              onClick={removeFromFavorites}
+            >
+              Remove from favorite
+            </button>
+          ) : (
+            <button className="btn btn-primary" onClick={addToFavorites}>
+              Add To Favorites
+            </button>
+          ))}
         <div className="recipe-section">
           <h2 className="section-title">Ingredients</h2>
           <ul className="ingredients-list">

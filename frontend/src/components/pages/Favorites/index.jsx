@@ -20,9 +20,7 @@ const Favorites = () => {
   const [favorites, setFavorites] = useState([]);
   const getFavorites = async () => {
     const result = await fetch(
-      `${import.meta.env.VITE_API_ENDPOINT}/api/favorites/${
-        cookies.auth.userId
-      }`
+      `${import.meta.env.VITE_API_ENDPOINT}/api/favorites/${cookies.auth.userId}`
     );
     const data = await result.json();
     console.log(data);

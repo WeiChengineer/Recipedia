@@ -10,10 +10,21 @@ import { useEffect } from "react";
 import Swal from "sweetalert2";
 import "../../../../css/cuisineForm.css";
 import { useCookies } from "react-cookie";
+import { hasWhitespaceAtEdges } from "../../../../../../utils/strings";
 
 const schema = z.object({
-  name: z.string().min(1, "Name is required"),
-  description: z.string().min(1, "Description is required"),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .refine((string) => !hasWhitespaceAtEdges(string), {
+      message: "Name cannot start with whitespace",
+    }),
+  description: z
+    .string()
+    .min(1, "Description is required")
+    .refine((string) => !hasWhitespaceAtEdges(string), {
+      message: "Description cannot start with whitespace",
+    }),
   country: z.string().min(1, "Country is required"),
   value: z.string().min(1, "Value is required"),
   userId: z.number().optional(),

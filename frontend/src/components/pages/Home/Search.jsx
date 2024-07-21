@@ -111,7 +111,7 @@ const Search = () => {
             type="text"
             id="default-search"
             className="search-input"
-            placeholder="Search recipes by name, restaurant, or ingredients"
+            placeholder="Search recipes by name"
             {...register("searchquery")}
             onFocus={() => setIsSearch(true)}
           />
@@ -123,7 +123,7 @@ const Search = () => {
           <p className="text-warning">{errors.searchquery.message}</p>
         )}
 
-        {isSearch && (
+        {/* {isSearch && (
           <div
             style={{
               margin: "20px 0px",
@@ -163,7 +163,7 @@ const Search = () => {
               </div>
             </div>
           </div>
-        )}
+        )} */}
       </form>
       {recipes && <RecipeCard recipes={recipes} />}
     </SectionWrapper>

@@ -23,8 +23,11 @@ const schema = z.object({
     .refine((string) => !hasWhitespaceAtEdges(string), {
       message: "Location cannot start with whitespace",
     }),
-  rating: z
-    .number()
+  rating: z.coerce
+    .number({
+      required_error: "Rating is required",
+      invalid_type_error: "Rating must be a number",
+    })
     .min(1, "Rating must be between 1 and 5")
     .max(5, "Rating must be between 1 and 5")
     .multipleOf(0.1),
@@ -184,7 +187,7 @@ const UpdateRestaurantForm = () => {
             className="mt-1 block w-full"
           />
           {errors.cuisineType && (
-            <p className="text-warning">{errors.cuisineType.message}</p>
+            <p className="text-warning">This field is required</p>
           )}
         </div>
 
@@ -194,7 +197,7 @@ const UpdateRestaurantForm = () => {
             type="number"
             max={5}
             min={1}
-            step={0.1}
+            // step={0.1}
             {...register("rating", { valueAsNumber: true })}
           />
           {errors.rating && (

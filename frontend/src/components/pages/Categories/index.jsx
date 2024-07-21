@@ -41,7 +41,7 @@ const Categories = () => {
           </Link>
         )}
       </div>
-      <Search />
+      {/* <Search /> */}
       <div className="grid grid-sm-2 grid-md-3 grid-lg-4">
         {cusines &&
           cusines.map((cuisine, index) => (

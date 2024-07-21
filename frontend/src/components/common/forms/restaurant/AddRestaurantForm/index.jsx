@@ -25,11 +25,13 @@ const schema = z.object({
     .refine((string) => !hasWhitespaceAtEdges(string), {
       message: "Location cannot start with whitespace",
     }),
-  rating: z
-    .number()
+  rating: z.coerce
+    .number({
+      required_error: "Rating is required",
+      invalid_type_error: "Rating must be a number",
+    })
     .min(1, "Rating must be between 1 and 5")
-    .max(5, "Rating must be between 1 and 5")
-    .multipleOf(0.1),
+    .max(5, "Rating must be between 1 and 5"),
   notes: z
     .string()
     .min(1, "Notes are required")
@@ -145,7 +147,7 @@ const AddRestaurantForm = () => {
   };
 
   const onSubmit = (data) => {
-    console.log("DATA ======= ", data)
+    console.log("DATA ======= ", data);
     addNewRestaurant(data);
   };
 
@@ -180,7 +182,7 @@ const AddRestaurantForm = () => {
             className="mt-1 block w-full"
           />
           {errors.cuisineId && (
-            <p className="text-warning">{errors.cuisineId.message}</p>
+            <p className="text-warning">This field is required</p>
           )}
         </div>
 
@@ -190,8 +192,8 @@ const AddRestaurantForm = () => {
             type="number"
             max={5}
             min={1}
-            step={0.1}
-            {...register("rating", { valueAsNumber: true })}
+            // step={0.1}
+            {...register("rating", { setValueAs: (value) => Number(value) })}
           />
           {errors.rating && (
             <p className="text-warning">{errors.rating.message}</p>

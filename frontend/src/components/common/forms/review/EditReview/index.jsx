@@ -16,8 +16,11 @@ const reviewSchema = z.object({
     .refine((string) => !hasWhitespaceAtEdges(string), {
       message: "Content cannot start with whitespace",
     }),
-  rating: z
-    .number()
+  rating: z.coerce
+    .number({
+      required_error: "Rating is required",
+      invalid_type_error: "Rating must be a number",
+    })
     .min(1, "Rating must be at least 1")
     .max(5, "Rating must be at most 5"),
   userId: z.number(),
@@ -122,7 +125,7 @@ const ReviewForm = () => {
             <label htmlFor="rating">Rating</label>
             <input
               type="number"
-              step={0.1}
+              // step={0.1}
               id="rating"
               {...register("rating", { valueAsNumber: true })}
             />

@@ -5,7 +5,7 @@ import Swal from "sweetalert2";
 import "../../css/review.css";
 import { useCookies } from "react-cookie";
 
-const Review = ({ id: recipeId, setTotalReviews }) => {
+const Review = ({ id: recipeId, setUserHasAReview }) => {
   const [reviews, setReviews] = useState([]);
   const [cookies] = useCookies();
 
@@ -15,10 +15,18 @@ const Review = ({ id: recipeId, setTotalReviews }) => {
     }
     return false;
   };
+  console.trace("Reviews ====== ", reviews);
 
   useEffect(() => {
-    setTotalReviews(reviews.length);
-  }, [reviews]);
+    if (
+      reviews &&
+      reviews.some((review) => review.userId === cookies?.auth?.userId)
+    ) {
+      setUserHasAReview(true);
+    }else {
+      setUserHasAReview(false);
+    }
+  }, [reviews, cookies]);
 
   const getReviews = async (recipeId) => {
     try {

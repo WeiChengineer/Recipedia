@@ -66,7 +66,7 @@ const UserInformation = () => {
           confirmButtonText: "Okay",
         });
         navigate("/");
-        removeCookie("auth")
+        removeCookie("auth");
       } else {
         Swal.fire({
           title: "Failed to delete User!",
@@ -84,7 +84,7 @@ const UserInformation = () => {
 
   const handleLogout = () => {
     removeCookie("auth");
-    navigate("/")
+    navigate("/");
   };
 
   useEffect(() => {
@@ -101,7 +101,7 @@ const UserInformation = () => {
           {menuActive && (
             <div className="menu active">
               <ul>
-                <li>
+                {/* <li>
                   <Link
                     to="/auth/updateUser"
                     className="btn btn-primary"
@@ -109,12 +109,17 @@ const UserInformation = () => {
                   >
                     Update Profile
                   </Link>
-                </li>
-                <li>
-                  <button className="btn delete-button" onClick={deleteProfile}>
-                    Delete Profile
-                  </button>
-                </li>
+                </li> */}
+                {user.username !== "demouser" && (
+                  <li>
+                    <button
+                      className="btn delete-button"
+                      onClick={deleteProfile}
+                    >
+                      Delete Profile
+                    </button>
+                  </li>
+                )}
                 <li>
                   <button
                     to="#"

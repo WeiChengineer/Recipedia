@@ -119,12 +119,13 @@ const RecipeDetail = () => {
     }
   };
 
-  const removeFromFavorites = async () => {
+  const removeFromFavorites = async (id) => {
+    // console.log("RECIPE ======= ", { id, recipe: recipe.recipeId });
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_ENDPOINT}/api/favorites/deleteFavorite/${
-          recipe.recipeId
-        }`,
+        `${
+          import.meta.env.VITE_API_ENDPOINT
+        }/api/favorites/deleteFavorite/${id}`,
         {
           method: "DELETE",
         }
@@ -216,27 +217,30 @@ const RecipeDetail = () => {
     return <div>Loading...</div>;
   }
 
+  const favoriteRecipe = favorites.find(
+    (favorite) => favorite.recipeId === recipe.recipeId
+  );
+
+  console.log({ favoriteRecipe });
+
   return (
     <SectionWrapper>
       <div className="shadow p-5 recipe-detail-container">
         <h1 className="recipe-title">{recipe.name}</h1>
         <img className="recipe-image" src={recipe.image} alt={recipe.name} />
-        {isUserLoggedIn &&
-          (favorites.some(
-            (favorite) => favorite.recipeId === recipe.recipeId
-          ) ? (
-            <button
-              className="btn btn-primary"
-              style={{ background: "red" }}
-              onClick={removeFromFavorites}
-            >
-              Remove from favorite
-            </button>
-          ) : (
-            <button className="btn btn-primary" onClick={addToFavorites}>
-              Add To Favorites
-            </button>
-          ))}
+        {isUserLoggedIn && (
+          <button
+            className="btn btn-primary"
+            style={{ background: favoriteRecipe && "red" }}
+            onClick={() =>
+              favoriteRecipe
+                ? removeFromFavorites(favoriteRecipe.favoritesId)
+                : addToFavorites()
+            }
+          >
+            {favoriteRecipe ? "Remove from favorite" : "Add to favorites"}
+          </button>
+        )}
         <div className="recipe-section">
           <h2 className="section-title">Ingredients</h2>
           <ul className="ingredients-list">

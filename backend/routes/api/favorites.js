@@ -54,9 +54,9 @@ router.post("/addFavorite", async (req, res) => {
 
 // Delete a favorite by favorite ID
 router.delete("/deleteFavorite/:id", async (req, res) => {
-  const recipeId = parseInt(req.params.id, 10);
+  const favoritesId = parseInt(req.params.id, 10);
   try {
-    const favorite = await Favorite.findOne({ recipeId });
+    const favorite = await Favorite.findByPk(favoritesId);
     if (!favorite) {
       return res
         .status(404)

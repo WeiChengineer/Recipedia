@@ -5,16 +5,9 @@ import Swal from "sweetalert2";
 import "../../css/review.css";
 import { useCookies } from "react-cookie";
 
-const Review = ({ id: recipeId }) => {
+const Review = ({ id: recipeId, setTotalReviews }) => {
   const [reviews, setReviews] = useState([]);
   const [cookies] = useCookies();
-  const [isSameUser, setIsSameUser] = useState(false);
-
-  // const isSameUser = () => {
-  //   if (cookies.auth !== undefined) {
-  //     return cookies.auth.userId === reviews.userId;
-  //   }
-  // };
 
   const checkSameUser = (user_id) => {
     if (cookies.auth !== undefined) {
@@ -23,11 +16,9 @@ const Review = ({ id: recipeId }) => {
     return false;
   };
 
-  // useEffect(() => {
-  //   if (reviews) {
-  //     setIsSameUser(checkSameUser(reviews.userId));
-  //   }
-  // }, [cookies, reviews]);
+  useEffect(() => {
+    setTotalReviews(reviews.length);
+  }, [reviews]);
 
   const getReviews = async (recipeId) => {
     try {

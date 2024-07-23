@@ -16,6 +16,7 @@ const RecipeDetail = () => {
   const [isSameUser, setIsSameUser] = useState(false);
   const [cookies] = useCookies();
   const [favorites, setFavorites] = useState([]);
+  const [totalReviews, setTotalReviews] = useState(null);
   const location = useLocation();
 
   const checkUserExist = () => {
@@ -271,14 +272,17 @@ const RecipeDetail = () => {
           </div>
         </div>
         <div className="action-buttons">
-          {isUserLoggedIn && (
-            <Link
-              to={`/review/addReview/${recipe.recipeId}`}
-              className="action-button"
-            >
-              Add Review
-            </Link>
-          )}
+          {isUserLoggedIn &&
+            (totalReviews ? (
+              <></>
+            ) : (
+              <Link
+                to={`/review/addReview/${recipe.recipeId}`}
+                className="action-button"
+              >
+                Add Review
+              </Link>
+            ))}
           {isSameUser && (
             <>
               <Link
@@ -296,7 +300,7 @@ const RecipeDetail = () => {
             </>
           )}
         </div>
-        <Review id={Number(slug)} />
+        <Review id={Number(slug)} setTotalReviews={setTotalReviews} />
       </div>
     </SectionWrapper>
   );

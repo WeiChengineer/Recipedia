@@ -7,33 +7,35 @@ import Swal from "sweetalert2";
 import "../../css/common.css";
 import "../../css/recipeDetail.css";
 import { useCookies } from "react-cookie";
+import { useAuthContext } from "../../../../context/Auth";
 
 const RecipeDetail = () => {
+  const [cookies] = useCookies();
+  const { isUserLoggedIn, checkIsSameUser, loggedInUser } = useAuthContext();
   const navigate = useNavigate();
   let { slug } = useParams();
   const [recipe, setRecipe] = useState(null);
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
-  const [isSameUser, setIsSameUser] = useState(false);
-  const [cookies] = useCookies();
+  // const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+  // const [isSameUser, setIsSameUser] = useState(false);
   const [favorites, setFavorites] = useState([]);
   const [userHasAReview, setUserHasAReview] = useState(false);
   const location = useLocation();
 
-  const checkUserExist = () => {
-    return cookies.auth !== undefined;
-  };
+  // const checkUserExist = () => {
+  //   return cookies.auth !== "undefined";
+  // };
 
-  const checkSameUser = (user_id) => {
-    if (cookies.auth !== undefined) {
-      return cookies.auth.userId === user_id;
-    }
-    return false;
-  };
+  // const checkSameUser = (user_id) => {
+  //   if (cookies.auth !== "undefined") {
+  //     return cookies?.auth?.userId === user_id;
+  //   }
+  //   return false;
+  // };
 
   const getFavorites = async () => {
     const result = await fetch(
       `${import.meta.env.VITE_API_ENDPOINT}/api/favorites/${
-        cookies.auth.userId
+        loggedInUser.userId
       }`
     );
     const data = await result.json();
@@ -42,7 +44,7 @@ const RecipeDetail = () => {
 
   useEffect(() => {
     getFavorites();
-  }, [cookies]);
+  }, [cookies, loggedInUser]);
 
   const getRecipe = async () => {
     try {
@@ -206,12 +208,12 @@ const RecipeDetail = () => {
     getRecipe();
   }, [slug]);
 
-  useEffect(() => {
-    setIsUserLoggedIn(checkUserExist());
-    if (recipe) {
-      setIsSameUser(checkSameUser(recipe.userId));
-    }
-  }, [cookies, recipe]);
+  // useEffect(() => {
+  //   setIsUserLoggedIn(checkUserExist());
+  //   if (recipe) {
+  //     setIsSameUser(checkSameUser(recipe.userId));
+  //   }
+  // }, [cookies, recipe]);
 
   if (!recipe) {
     return <div>Loading...</div>;
@@ -287,7 +289,7 @@ const RecipeDetail = () => {
                 Add Review
               </Link>
             ))}
-          {isSameUser && (
+          {checkIsSameUser(loggedInUser && loggedInUser.userId) && (
             <>
               <Link
                 to={`/recipes/editRecipesForm/${recipe.recipeId}`}

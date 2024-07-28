@@ -65,8 +65,6 @@ const App = () => {
           path="/review/updateReview/:recipe/:slug"
           element={<EditReview />}
         />
-
-        {/* <Route path="*" element={<NotFound />} /> */}
       </Routes>
     </>
   );

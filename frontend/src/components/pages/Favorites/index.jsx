@@ -3,24 +3,28 @@ import SectionWrapper from "../../common/SectionWrapper";
 import { Link } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import "../../css/favorites.css";
+import { useAuthContext } from "../../../../context/Auth";
 
 const Favorites = () => {
+  const { isUserLoggedIn, checkIsSameUser, loggedInUser } = useAuthContext();
   const [cookies] = useCookies();
-  const [userExist, setUserExist] = useState();
-  const [userId, setUserId] = useState();
+  // const [userExist, setUserExist] = useState();
+  // const [userId, setUserId] = useState();
 
-  useEffect(() => {
-    if (cookies.auth !== undefined) {
-      setUserExist(true);
-      setUserId(cookies.auth.userId);
-      console.log("user id is", cookies.auth.userId);
-    } else setUserExist(false);
-  }, [cookies]);
+  // useEffect(() => {
+  //   if (cookies.auth !== "undefined") {
+  //     setUserExist(true);
+  //     setUserId(cookies.auth.userId);
+  //     console.log("user id is", cookies.auth.userId);
+  //   } else setUserExist(false);
+  // }, [cookies]);
 
   const [favorites, setFavorites] = useState([]);
   const getFavorites = async () => {
     const result = await fetch(
-      `${import.meta.env.VITE_API_ENDPOINT}/api/favorites/${cookies.auth.userId}`
+      `${import.meta.env.VITE_API_ENDPOINT}/api/favorites/${
+        loggedInUser?.userId
+      }`
     );
     const data = await result.json();
     console.log(data);
@@ -29,14 +33,14 @@ const Favorites = () => {
 
   useEffect(() => {
     getFavorites();
-  }, [cookies]);
+  }, [loggedInUser]);
 
   console.log("FAV === ", favorites);
 
   return (
     <SectionWrapper>
       <h1 className="heading text-center mb-5">All Your Favorites are here</h1>
-      {!userExist && (
+      {!isUserLoggedIn && (
         <div className="favorites">
           <p>You are not logged in. Please login to access your favorites.</p>
           <div>
@@ -46,7 +50,7 @@ const Favorites = () => {
           </div>
         </div>
       )}
-      {userExist && (
+      {isUserLoggedIn && (
         <div className="grid grid-sm-2 grid-md-3 grid-lg-4">
           {favorites.map(({ Recipe: recipe }, index) => {
             console.log("REC", recipe);

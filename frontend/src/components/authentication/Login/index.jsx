@@ -8,6 +8,7 @@ import "./style.css";
 import { useCookies } from "react-cookie";
 import Swal from "sweetalert2";
 import "sweetalert2/src/sweetalert2.scss";
+import { useAuthContext } from "../../../../context/Auth";
 
 const schema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email format"),
@@ -18,6 +19,7 @@ const schema = z.object({
 });
 
 const Login = () => {
+  const { handleUserLogin } = useAuthContext();
   // eslint-disable-next-line no-unused-vars
   const [cookies, setCookie] = useCookies();
   console.log("COOKIES", setCookie);
@@ -43,7 +45,8 @@ const Login = () => {
       );
       const result = await response.json();
       if (result.status === 200) {
-        setCookie("auth", result.cookie, { maxAge: 7 * 24 * 60 * 60 * 1000 });
+        // setCookie("auth", result.cookie, { maxAge: 7 * 24 * 60 * 60 * 1000 });
+        handleUserLogin(result.cookie);
         navigate(result.redirect);
         return;
       }

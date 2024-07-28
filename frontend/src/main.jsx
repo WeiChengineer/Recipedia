@@ -1,12 +1,13 @@
-import ReactDOM from 'react-dom/client'
-import App from './App.jsx'
-import './index.css'
+import ReactDOM from "react-dom/client";
+import App from "./App.jsx";
+import "./index.css";
 import { BrowserRouter } from "react-router-dom";
+import { AuthStateWrapper } from "../context/Auth.jsx";
 
-console.log(import.meta.env)
-
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(document.getElementById("root")).render(
   <BrowserRouter>
-    <App />
-  </BrowserRouter>,
-)
+    <AuthStateWrapper>
+      <App />
+    </AuthStateWrapper>
+  </BrowserRouter>
+);

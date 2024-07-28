@@ -2,22 +2,10 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import SectionWrapper from "../../common/SectionWrapper";
 import "../../css/restaurants.css";
-import { useCookies } from "react-cookie";
+import { useAuthContext } from "../../../../context/Auth";
 
 const Restaurant = () => {
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
-  const [cookies] = useCookies();
-
-  const checkUserExist = () => {
-    if (cookies.auth !== undefined) {
-      return true;
-    }
-    return false;
-  };
-
-  useEffect(() => {
-    setIsUserLoggedIn(checkUserExist());
-  }, [cookies]);
+  const { isUserLoggedIn } = useAuthContext();
 
   const [restaurants, setRestaurants] = useState([]);
 

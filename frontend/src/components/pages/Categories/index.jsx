@@ -5,9 +5,12 @@ import Search from "../Home/Search";
 import CountryFlag from "./CountryFlag";
 import { useEffect, useState } from "react";
 import "../../css/common.css";
-import IsUserExist from "../../utils/isUserExist";
+import { useAuthContext } from "../../../../context/Auth";
+// import IsUserExist from "../../utils/isUserExist";
 // import CuisineDetail from "./CuisineDetail"
 const Categories = () => {
+  const { isUserLoggedIn, checkIsSameUser, loggedInUser } = useAuthContext();
+
   const [cusines, setCuisines] = useState([]);
 
   const fetchCusines = async () => {
@@ -17,7 +20,6 @@ const Categories = () => {
     );
     const data = await response.json();
     setCuisines(data.data);
-    console.log("object", data);
   };
 
   console.log(cusines);
@@ -35,7 +37,7 @@ const Categories = () => {
         >
           All Cuisine
         </h1>
-        {IsUserExist() && (
+        {isUserLoggedIn && (
           <Link to="/cuisine/cuisineForm" className="btn btn-primary">
             Add Cuisine
           </Link>

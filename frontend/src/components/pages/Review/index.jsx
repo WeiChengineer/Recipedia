@@ -4,26 +4,27 @@ import StarRatings from "react-star-ratings";
 import Swal from "sweetalert2";
 import "../../css/review.css";
 import { useCookies } from "react-cookie";
+import { useAuthContext } from "../../../../context/Auth";
 
 const Review = ({ id: recipeId, setUserHasAReview }) => {
+  const { checkIsSameUser } = useAuthContext();
+
   const [reviews, setReviews] = useState([]);
   const [cookies] = useCookies();
 
-  const checkSameUser = (user_id) => {
-    if (cookies.auth !== undefined) {
-      return cookies.auth.userId === user_id;
-    }
-    return false;
-  };
-  console.trace("Reviews ====== ", reviews);
-
+  // const checkSameUser = (user_id) => {
+  //   if (cookies.auth !== "undefined") {
+  //     return cookies.auth.userId === user_id;
+  //   }
+  //   return false;
+  // };
   useEffect(() => {
     if (
       reviews &&
       reviews.some((review) => review.userId === cookies?.auth?.userId)
     ) {
       setUserHasAReview(true);
-    }else {
+    } else {
       setUserHasAReview(false);
     }
   }, [reviews, cookies]);
@@ -108,7 +109,7 @@ const Review = ({ id: recipeId, setUserHasAReview }) => {
               </div>
               <div className="review-footer">
                 <span>{new Date(review.date).toLocaleString()}</span>
-                {checkSameUser(review.userId) && (
+                {checkIsSameUser(review.userId) && (
                   <div className="review-actions">
                     <Link
                       to={`/review/updateReview/${recipeId}/${review.reviewId}`}

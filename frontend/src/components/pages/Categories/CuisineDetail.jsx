@@ -6,26 +6,24 @@ import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import "../../css/common.css";
 import "../../css/cuisineDetail.css";
-import CheckUserLogin from "../../utils/sameUserLogin";
 import { useCookies } from "react-cookie";
+import { useAuthContext } from "../../../../context/Auth";
 
 const CuisineDetail = () => {
+  const { isUserLoggedIn, checkIsSameUser, loggedInUser } = useAuthContext();
   const navigate = useNavigate();
   const [cookies] = useCookies();
-
   let { slug } = useParams();
-  console.log("id=>", slug);
-
   const [cuisineDetail, setCuisinesDetail] = useState({});
 
   const [isSameUser, setIsSameUser] = useState(false);
 
-  const checkSameUser = (user_id) => {
-    if (cookies.auth !== undefined) {
-      return cookies.auth.userId === user_id;
-    }
-    return false;
-  };
+  // const checkSameUser = (user_id) => {
+  //   if (cookies.auth !== "undefined") {
+  //     return cookies.auth.userId === user_id;
+  //   }
+  //   return false;
+  // };
 
   const deleteCuisine = async () => {
     try {
@@ -83,7 +81,7 @@ const CuisineDetail = () => {
 
   useEffect(() => {
     if (cuisineDetail) {
-      setIsSameUser(checkSameUser(cuisineDetail.userId));
+      setIsSameUser(checkIsSameUser(cuisineDetail.userId));
     }
   }, [cookies, cuisineDetail]);
 

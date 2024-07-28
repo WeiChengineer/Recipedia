@@ -3,18 +3,20 @@ import { Link, useLocation } from "react-router-dom";
 import "../../css/navbar.css";
 import UserInformation from "./UserInformation";
 import { useCookies } from "react-cookie";
+import { useAuthContext } from "../../../../context/Auth";
 
 const Navbar = () => {
-  const [cookies] = useCookies();
-  const [userExist, setUserExist] = useState(false);
+  // const [cookies] = useCookies();
+  // const [userExist, setUserExist] = useState(false);
+  const { isUserLoggedIn, checkIsSameUser, loggedInUser } = useAuthContext();
 
-  useEffect(() => {
-    if (typeof cookies.auth === "object") {
-      setUserExist(true);
-    } else {
-      setUserExist(false);
-    }
-  }, [cookies]);
+  // useEffect(() => {
+  //   if (typeof cookies.auth === "object") {
+  //     setUserExist(true);
+  //   } else {
+  //     setUserExist(false);
+  //   }
+  // }, [cookies]);
 
   const location = useLocation();
   const pathname = location.pathname.replace(/^\//, "");
@@ -79,7 +81,7 @@ const Navbar = () => {
                 </li>
               ))}
               <li className="nav-item">
-                {userExist ? (
+                {isUserLoggedIn ? (
                   <UserInformation />
                 ) : (
                   <Link

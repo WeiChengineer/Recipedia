@@ -3,6 +3,7 @@ import "./userInfo.css";
 import { useCookies } from "react-cookie";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import { useAuthContext } from "../../../../context/Auth";
 
 const UserInformation = () => {
   const [user, setUser] = useState(null);
@@ -10,8 +11,7 @@ const UserInformation = () => {
   const [menuActive, setMenuActive] = useState(false);
   const profileRef = useRef(null);
   const navigate = useNavigate();
-
-  console.log("USER ======= ", user);
+  const { handleUserLogout } = useAuthContext();
 
   const toggleMenu = () => {
     setMenuActive(!menuActive);
@@ -83,8 +83,8 @@ const UserInformation = () => {
   };
 
   const handleLogout = () => {
-    removeCookie("auth");
-    navigate("/");
+    handleUserLogout()
+    navigate("/auth/login");
   };
 
   useEffect(() => {
